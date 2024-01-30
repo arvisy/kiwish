@@ -5,9 +5,34 @@ package user;
 option go_package="../pb";
 
 service UserService {
+    // user
     rpc Register (RegisterRequest) returns (RegisterResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
+
+    // customer
+    rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
+    rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
+    // rpc DeleteCustomer (Empty) returns (Empty);
+    // rpc AddAddress (Empty) returns (Empty);
+    // rpc UpdateAddress (Empty) returns (Empty);
+
+    // // admin
+    // rpc GetCustomer (Empty) returns (Empty);
+    // rpc GetAllCustomer (Empty) returns (Empty);
+    // rpc UpdateCustomer (Empty) returns (Empty);
+    // rpc DeleteCustomer (Empty) returns (Empty);
+
+    
+    // rpc GetSeller (Empty) returns (Empty);
+    // rpc GetAllSeller (Empty) returns (Empty);
+    // rpc UpdateSeller (Empty) returns (Empty);
+    // rpc DeleteSeller (Empty) returns (Empty);
+
+    // rpc ReportSales (Empty) returns (Empty);
+    // rpc CreateFlashSale (Empty) returns (Empty);
 }
+
+message Empty {}
 
 message RegisterRequest {
     string name = 1;
@@ -16,10 +41,8 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-    int64 id = 1;
-    string name = 2;
-    string email = 3;
-    string password = 4;
+    string name = 1;
+    string email = 2;
 }
 
 message LoginRequest {
@@ -28,11 +51,31 @@ message LoginRequest {
 }
 
 message LoginResponse {
-    int64 id = 1;
+    string id = 1;
     string name = 2;
-    string email = 3;
-    string password = 4;   
+    string email = 3; 
 }
 
-message Empty {}
+message GetCustomerRequest {
+    string id = 1;
+}
+
+message GetCustomerResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message UpdateCustomerRequest {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateCustomerResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
 
