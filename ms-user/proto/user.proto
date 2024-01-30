@@ -12,8 +12,8 @@ service UserService {
     // customer
     rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
-    // rpc DeleteCustomer (Empty) returns (Empty);
-    // rpc AddAddress (Empty) returns (Empty);
+    rpc DeleteCustomer (DeleteCustomerRequest) returns (Empty);
+    rpc AddAddress (AddAddressRequest) returns (AddAddressResponse);
     // rpc UpdateAddress (Empty) returns (Empty);
 
     // // admin
@@ -79,3 +79,19 @@ message UpdateCustomerResponse {
     string password = 3;
 }
 
+message DeleteCustomerRequest {
+    string id = 1;
+}
+
+message AddAddressRequest {
+    string user_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message AddAddressResponse {
+    string address = 1;
+    string regency = 2;
+    string city = 3;
+}

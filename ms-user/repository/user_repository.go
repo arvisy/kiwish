@@ -26,7 +26,7 @@ func (u *UserRepository) AddUser(user model.User) error {
 }
 
 func (u *UserRepository) AddAddress(address model.Address) error {
-	_, err := u.DB.Exec("INSERT INTO address(id, user_id, address, regency, city) VALUES($1, $2, $3, $4, $5)", address.Id, address.UserID, address.Address, address.Regency, address.City)
+	_, err := u.DB.Exec("INSERT INTO address(user_id, address, regency, city) VALUES($1, $2, $3, $4)", address.UserID, address.Address, address.Regency, address.City)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func (u *UserRepository) GetCustomer(user *model.User) error {
 
 func (u *UserRepository) UpdateCustomer(userID int, customer model.User) error {
 	query := "UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4"
-	_, err := u.DB.Exec(query)
+	_, err := u.DB.Exec(query, customer.Name, customer.Email, customer.Password, userID)
 	if err != nil {
 		panic(err)
 	}

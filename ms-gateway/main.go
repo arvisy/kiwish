@@ -29,10 +29,13 @@ func main() {
 		public.POST("/login", u.Login)
 	}
 
-	private := e.Group("")
-	// private.Use(middleware.Authentication)
+	private := e.Group("/api")
+	private.Use(middleware.Authentication)
 	{
-		private.GET("/users", u.GetInfoCustomer, middleware.Authentication)
+		private.GET("/user", u.GetInfoCustomer)
+		private.PUT("/user", u.UpdateCustomer)
+		private.DELETE("/user", u.DeleteCustomer)
+		private.POST("/user/address", u.AddAddress)
 	}
 
 	e.Logger.Fatal(e.Start(":8080"))
