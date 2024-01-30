@@ -1,14 +1,13 @@
 CREATE TABLE "sellers" (
   "id" serial PRIMARY KEY,
-  "user_id" int NOT NULL,
-  "name" varchar NOT NULL,
+  "user_id" int NOT NULL UNIQUE,
+  "name" varchar NOT NULL UNIQUE,
   "address_id" int NOT NULL,
   "last_active" date NOT NULL
 );
 
 CREATE TABLE "address" (
   "id" serial PRIMARY KEY,
-  "user_id" int NOT NULL,
   "address" varchar NOT NULL,
   "regency" varchar NOT NULL,
   "city" varchar NOT NULL
@@ -17,7 +16,7 @@ CREATE TABLE "address" (
 CREATE TABLE "products" (
   "id" serial PRIMARY KEY,
   "seller_id" int NOT NULL,
-  "name" varchar NOT NULL,
+  "name" varchar NOT NULL UNIQUE,
   "price" decimal NOT NULL,
   "stock" int NOT NULL,
   "category_id" int NOT NULL,
@@ -26,7 +25,7 @@ CREATE TABLE "products" (
 
 CREATE TABLE "categories" (
   "id" serial PRIMARY KEY,
-  "name" varchar NOT NULL
+  "name" varchar NOT NULL UNIQUE
 );
 
 ALTER TABLE "sellers" ADD FOREIGN KEY ("address_id") REFERENCES "address" ("id");

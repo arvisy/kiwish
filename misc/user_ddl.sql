@@ -7,7 +7,7 @@ CREATE TABLE "users" (
   "id" serial PRIMARY KEY,
   "role_id" int NOT NULL,
   "name" varchar NOT NULL,
-  "email" varchar NOT NULL,
+  "email" varchar NOT NULL UNIQUE,
   "password" varchar NOT NULL,
   "address" varchar NOT NULL
 );
