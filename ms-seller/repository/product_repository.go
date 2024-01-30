@@ -11,6 +11,7 @@ type ProductRepository interface {
 	Create(input *model.Product) (*model.Product, error)
 	ReadAll(sellerID int) ([]*model.Product, error)
 	ReadID(productID int, sellerID int) (*model.Product, error)
+	ReadCategory(categoryName string) ([]*model.Product, error)
 	Delete(productID int, sellerID int) error
 	Update(input *model.Product) error
 }
@@ -97,6 +98,37 @@ func (us *postgresRepository) ReadID(productID int, sellerID int) (*model.Produc
 	}
 
 	return &product, nil
+}
+
+func (us *postgresRepository) ReadCategory(categoryName string) ([]*model.Product, error) {
+	query := `SELECT * FROM products WHERE seller_id = $1`
+
+	rows, err := us.DB.QueryContext(context.Background(), query, sellerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []*model.Product
+
+	for rows.Next() {
+		var product model.Product
+		err := rows.Scan(
+			&product.ID,
+			&product.SellerID,
+			&product.Name,
+			&product.Price,
+			&product.Stock,
+			&product.Category_id,
+			&product.Discount,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("read all product: %w", err)
+		}
+		products = append(products, &product)
+	}
+
+	return products, nil
 }
 
 func (us *postgresRepository) Delete(productID int, sellerID int) error {
