@@ -5,4 +5,5 @@ use (
     ./ms-order
     ./ms-seller
     ./ms-user
+    ./ms-cart
 )
