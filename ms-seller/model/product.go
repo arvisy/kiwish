@@ -9,11 +9,3 @@ type Product struct {
 	Category_id int     `json:"category_id"`
 	Discount    int     `json:"discount"`
 }
-
-type ProductInput struct {
-	Name        string  `json:"name"` //add validation
-	Price       float32 `json:"price"`
-	Stock       int     `json:"stock"`
-	Category_id int     `json:"category_id"`
-	Discount    int     `json:"discount"`
-}
