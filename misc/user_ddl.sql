@@ -9,12 +9,11 @@ CREATE TABLE "users" (
   "name" varchar NOT NULL,
   "email" varchar NOT NULL UNIQUE,
   "password" varchar NOT NULL,
-  "address" varchar NOT NULL
+  "address_id" int NOT NULL
 );
 
 CREATE TABLE "address" (
   "id" serial PRIMARY KEY,
-  "user_id" int NOT NULL,
   "address" varchar NOT NULL,
   "regency" varchar NOT NULL,
   "city" varchar NOT NULL
@@ -23,4 +22,4 @@ CREATE TABLE "address" (
 
 ALTER TABLE "users" ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 
-ALTER TABLE "address" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "users" ADD FOREIGN KEY ("address_id") REFERENCES "address" ("id");

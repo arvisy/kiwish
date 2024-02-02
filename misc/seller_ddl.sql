@@ -1,6 +1,5 @@
 CREATE TABLE "sellers" (
-  "id" serial PRIMARY KEY,
-  "user_id" int NOT NULL UNIQUE,
+  "id" int PRIMARY KEY,
   "name" varchar NOT NULL UNIQUE,
   "address_id" int NOT NULL,
   "last_active" date NOT NULL
@@ -17,6 +16,7 @@ CREATE TABLE "products" (
   "id" serial PRIMARY KEY,
   "seller_id" int NOT NULL,
   "name" varchar NOT NULL UNIQUE,
+  "description" text NOT NULL,
   "price" decimal NOT NULL,
   "stock" int NOT NULL,
   "category_id" int NOT NULL,
