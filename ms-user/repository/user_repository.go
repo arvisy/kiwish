@@ -36,6 +36,17 @@ func (u *UserRepository) SetAddressCustomer(user model.User, addressID int) erro
 	return nil
 }
 
+func (u *UserRepository) GetAddressID(userID int) (int, error) {
+	var addressID int
+	err := u.DB.QueryRow("SELECT address_id FROM users WHERE id=$1", userID).Scan(&addressID)
+	if err != nil {
+		log.Fatal(err)
+		return 0, err
+	}
+
+	return addressID, nil
+}
+
 func (u *UserRepository) UpdateAddress(addressID int, address model.Address) error {
 	query := "UPDATE address SET address=$1, regency=$2, city=$3 WHERE id=$4"
 	_, err := u.DB.Exec(query, address.Address, address.Regency, address.City, addressID)

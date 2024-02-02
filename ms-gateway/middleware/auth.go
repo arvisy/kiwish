@@ -41,21 +41,15 @@ func Authentication(next echo.HandlerFunc) echo.HandlerFunc {
 			})
 		}
 
-		c.Set("id", userID)
-
-		return next(c)
-	}
-}
-
-func CustomerAuth(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		role := c.Get("role").(string)
-
-		if role != "customer" {
-			return c.JSON(403, echo.Map{
-				"message": "forbidden",
+		role, ok := claims["role"].(string)
+		if !ok {
+			return c.JSON(401, echo.Map{
+				"message": "unauthorized",
 			})
 		}
+
+		c.Set("id", userID)
+		c.Set("role", role)
 
 		return next(c)
 	}
@@ -65,7 +59,21 @@ func AdminAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		role := c.Get("role").(string)
 
-		if role != "admin" {
+		if role != "1" {
+			return c.JSON(403, echo.Map{
+				"message": "forbidden",
+			})
+		}
+
+		return next(c)
+	}
+}
+
+func CustomerAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		role := c.Get("role").(string)
+
+		if role != "2" {
 			return c.JSON(403, echo.Map{
 				"message": "forbidden",
 			})
@@ -79,7 +87,7 @@ func SellerAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		role := c.Get("role").(string)
 
-		if role != "seller" {
+		if role != "3" {
 			return c.JSON(403, echo.Map{
 				"message": "forbidden",
 			})

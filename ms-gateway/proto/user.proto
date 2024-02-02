@@ -21,8 +21,8 @@ service UserService {
     // rpc GetAllCustomer (Empty) returns (Empty);
     // rpc UpdateCustomer (Empty) returns (Empty);
     // rpc DeleteCustomer (Empty) returns (Empty);
-
     
+    // seller
     // rpc GetSeller (Empty) returns (Empty);
     // rpc GetAllSeller (Empty) returns (Empty);
     // rpc UpdateSeller (Empty) returns (Empty);
@@ -99,9 +99,10 @@ message AddAddressResponse {
 
 message UpdateAddressRequest {
     string user_id = 1;
-    string address = 2;
-    string regency = 3;
-    string city = 4;
+    string address_id = 2;
+    string address = 3;
+    string regency = 4;
+    string city = 5;
 }
 
 message UpdateAddressResponse {
