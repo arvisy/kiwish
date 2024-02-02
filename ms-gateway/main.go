@@ -8,6 +8,7 @@ import (
 	routes "ms-gateway/router"
 
 	"github.com/labstack/echo/v4"
+	midd "github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -34,8 +35,8 @@ func main() {
 
 	routes.ApiRoutes(e, u, s)
 
-	// e.Use(middleware.Logger())
-	// e.Use(middleware.Recover())
+	e.Use(midd.Logger())
+	e.Use(midd.Recover())
 
 	// public := e.Group("/user")
 	// {
@@ -44,13 +45,13 @@ func main() {
 	// }
 
 	private := e.Group("/api")
-	private.Use(middleware.Authentication)
+	private.Use(middleware.Authentication, middleware.CustomerAuth)
 	{
 		private.GET("/user", u.GetInfoCustomer)
 		private.PUT("/user", u.UpdateCustomer)
 		private.DELETE("/user", u.DeleteCustomer)
 		private.POST("/user/address", u.AddAddress)
-		// private.PUT("/user/address", )
+		private.PUT("/user/address", u.UpdateAddress)
 	}
 	// private := e.Group("")
 	// // private.Use(middleware.Authentication)
