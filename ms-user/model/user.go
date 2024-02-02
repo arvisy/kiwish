@@ -1,16 +1,16 @@
 package model
 
 type User struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	RoleID   int    `json:"role_id"`
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	RoleID    int    `json:"role_id"`
+	AddressID int    `json:"address_id"`
 }
 
 type Address struct {
 	Id      int    `json:"id"`
-	UserID  int    `json:"user_id"`
 	Address string `json:"address"`
 	Regency string `json:"regency"`
 	City    string `json:"city"`

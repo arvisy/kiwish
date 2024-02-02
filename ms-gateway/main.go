@@ -36,6 +36,7 @@ func main() {
 		private.PUT("/user", u.UpdateCustomer)
 		private.DELETE("/user", u.DeleteCustomer)
 		private.POST("/user/address", u.AddAddress)
+		// private.PUT("/user/address", )
 	}
 
 	e.Logger.Fatal(e.Start(":8080"))

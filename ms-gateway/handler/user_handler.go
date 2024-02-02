@@ -5,6 +5,7 @@ import (
 	"ms-gateway/helper"
 	"ms-gateway/model"
 	pb "ms-gateway/pb"
+	"strconv"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -76,7 +77,8 @@ func (u *UserHandler) Login(c echo.Context) error {
 	}
 
 	claims := jwt.MapClaims{
-		"id": response.Id,
+		"id":   response.Id,
+		"role": response.Role,
 	}
 
 	token, err := helper.GenerateJWTTokenWithClaims(claims)
@@ -161,6 +163,18 @@ func (u *UserHandler) DeleteCustomer(c echo.Context) error {
 func (u *UserHandler) AddAddress(c echo.Context) error {
 	userID := c.Get("id").(string)
 
+	uID, _ := strconv.Atoi(userID)
+
+	user := model.User{
+		Id: uID,
+	}
+
+	if user.AddressID != 0 {
+		return c.JSON(400, helper.Response{
+			Message: "address already exist",
+		})
+	}
+
 	var payload model.Address
 	if err := c.Bind(&payload); err != nil {
 		return c.JSON(400, helper.Response{
@@ -193,5 +207,53 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 	return c.JSON(201, echo.Map{
 		"message": "address created successfully",
 		"address": response,
+	})
+}
+
+func (u *UserHandler) UpdateAddress(c echo.Context) error {
+	userID := c.Get("id").(string)
+
+	uID, _ := strconv.Atoi(userID)
+
+	user := model.User{
+		Id: uID,
+	}
+
+	if user.AddressID != 0 {
+		return c.JSON(400, helper.Response{
+			Message: "address not found",
+		})
+	}
+
+	var updateRequest pb.UpdateAddressRequest
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid update request payload",
+		})
+	}
+
+	if updateRequest.Address == "" || updateRequest.Regency == "" || updateRequest.City == "" {
+		return c.JSON(400, helper.Response{
+			Message: "address, regency, and city are required",
+		})
+	}
+
+	response, err := u.userGRPC.UpdateAddress(context.TODO(), &pb.UpdateAddressRequest{
+		UserId:  userID,
+		Address: updateRequest.Address,
+		Regency: updateRequest.Regency,
+		City:    updateRequest.City,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to update address",
+			Detail:  err.Error(),
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Message: "address updated successfully",
+		Detail:  response,
 	})
 }
