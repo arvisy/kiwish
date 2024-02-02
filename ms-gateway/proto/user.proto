@@ -12,11 +12,11 @@ service UserService {
     // customer
     rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
-    // rpc DeleteCustomer (Empty) returns (Empty);
-    // rpc AddAddress (Empty) returns (Empty);
-    // rpc UpdateAddress (Empty) returns (Empty);
+    rpc DeleteCustomer (DeleteCustomerRequest) returns (Empty);
+    rpc AddAddress (AddAddressRequest) returns (AddAddressResponse);
+    rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
 
-    // // admin
+    // admin
     // rpc GetCustomer (Empty) returns (Empty);
     // rpc GetAllCustomer (Empty) returns (Empty);
     // rpc UpdateCustomer (Empty) returns (Empty);
@@ -52,8 +52,9 @@ message LoginRequest {
 
 message LoginResponse {
     string id = 1;
-    string name = 2;
-    string email = 3; 
+    string role = 2;
+    string name = 3;
+    string email = 4; 
 }
 
 message GetCustomerRequest {
@@ -79,3 +80,32 @@ message UpdateCustomerResponse {
     string password = 3;
 }
 
+message DeleteCustomerRequest {
+    string id = 1;
+}
+
+message AddAddressRequest {
+    string user_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message AddAddressResponse {
+    string address = 1;
+    string regency = 2;
+    string city = 3;
+}
+
+message UpdateAddressRequest {
+    string user_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message UpdateAddressResponse {
+    string address = 1;
+    string regency = 2;
+    string city = 3;
+}

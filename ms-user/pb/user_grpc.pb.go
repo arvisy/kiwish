@@ -23,6 +23,9 @@ const (
 	UserService_Login_FullMethodName          = "/user.UserService/Login"
 	UserService_GetCustomer_FullMethodName    = "/user.UserService/GetCustomer"
 	UserService_UpdateCustomer_FullMethodName = "/user.UserService/UpdateCustomer"
+	UserService_DeleteCustomer_FullMethodName = "/user.UserService/DeleteCustomer"
+	UserService_AddAddress_FullMethodName     = "/user.UserService/AddAddress"
+	UserService_UpdateAddress_FullMethodName  = "/user.UserService/UpdateAddress"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -35,6 +38,9 @@ type UserServiceClient interface {
 	// customer
 	GetCustomer(ctx context.Context, in *GetCustomerRequest, opts ...grpc.CallOption) (*GetCustomerResponse, error)
 	UpdateCustomer(ctx context.Context, in *UpdateCustomerRequest, opts ...grpc.CallOption) (*UpdateCustomerResponse, error)
+	DeleteCustomer(ctx context.Context, in *DeleteCustomerRequest, opts ...grpc.CallOption) (*Empty, error)
+	AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error)
+	UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error)
 }
 
 type userServiceClient struct {
@@ -81,6 +87,33 @@ func (c *userServiceClient) UpdateCustomer(ctx context.Context, in *UpdateCustom
 	return out, nil
 }
 
+func (c *userServiceClient) DeleteCustomer(ctx context.Context, in *DeleteCustomerRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, UserService_DeleteCustomer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error) {
+	out := new(AddAddressResponse)
+	err := c.cc.Invoke(ctx, UserService_AddAddress_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error) {
+	out := new(UpdateAddressResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateAddress_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -91,6 +124,9 @@ type UserServiceServer interface {
 	// customer
 	GetCustomer(context.Context, *GetCustomerRequest) (*GetCustomerResponse, error)
 	UpdateCustomer(context.Context, *UpdateCustomerRequest) (*UpdateCustomerResponse, error)
+	DeleteCustomer(context.Context, *DeleteCustomerRequest) (*Empty, error)
+	AddAddress(context.Context, *AddAddressRequest) (*AddAddressResponse, error)
+	UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -109,6 +145,15 @@ func (UnimplementedUserServiceServer) GetCustomer(context.Context, *GetCustomerR
 }
 func (UnimplementedUserServiceServer) UpdateCustomer(context.Context, *UpdateCustomerRequest) (*UpdateCustomerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCustomer not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteCustomer(context.Context, *DeleteCustomerRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCustomer not implemented")
+}
+func (UnimplementedUserServiceServer) AddAddress(context.Context, *AddAddressRequest) (*AddAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddAddress not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAddress not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -195,6 +240,60 @@ func _UserService_UpdateCustomer_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_DeleteCustomer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCustomerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteCustomer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_DeleteCustomer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteCustomer(ctx, req.(*DeleteCustomerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_AddAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AddAddress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddAddress(ctx, req.(*AddAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateAddress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateAddress(ctx, req.(*UpdateAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -217,6 +316,18 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCustomer",
 			Handler:    _UserService_UpdateCustomer_Handler,
+		},
+		{
+			MethodName: "DeleteCustomer",
+			Handler:    _UserService_DeleteCustomer_Handler,
+		},
+		{
+			MethodName: "AddAddress",
+			Handler:    _UserService_AddAddress_Handler,
+		},
+		{
+			MethodName: "UpdateAddress",
+			Handler:    _UserService_UpdateAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

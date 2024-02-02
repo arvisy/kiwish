@@ -46,3 +46,45 @@ func Authentication(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+func CustomerAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		role := c.Get("role").(string)
+
+		if role != "customer" {
+			return c.JSON(403, echo.Map{
+				"message": "forbidden",
+			})
+		}
+
+		return next(c)
+	}
+}
+
+func AdminAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		role := c.Get("role").(string)
+
+		if role != "admin" {
+			return c.JSON(403, echo.Map{
+				"message": "forbidden",
+			})
+		}
+
+		return next(c)
+	}
+}
+
+func SellerAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		role := c.Get("role").(string)
+
+		if role != "seller" {
+			return c.JSON(403, echo.Map{
+				"message": "forbidden",
+			})
+		}
+
+		return next(c)
+	}
+}

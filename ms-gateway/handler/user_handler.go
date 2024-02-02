@@ -5,6 +5,7 @@ import (
 	"ms-gateway/helper"
 	"ms-gateway/model"
 	pb "ms-gateway/pb"
+	"strconv"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -25,6 +26,12 @@ func (u *UserHandler) Register(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, helper.Response{
 			Message: "invalid request payload",
+		})
+	}
+
+	if payload.Name == "" || payload.Email == "" || payload.Password == "" {
+		return c.JSON(400, helper.Response{
+			Message: "name, email, and password are required",
 		})
 	}
 
@@ -52,6 +59,12 @@ func (u *UserHandler) Login(c echo.Context) error {
 		})
 	}
 
+	if loginRequest.Email == "" || loginRequest.Password == "" {
+		return c.JSON(400, helper.Response{
+			Message: "email and password are required",
+		})
+	}
+
 	response, err := u.userGRPC.Login(context.TODO(), &pb.LoginRequest{
 		Email:    loginRequest.Email,
 		Password: loginRequest.Password,
@@ -64,7 +77,8 @@ func (u *UserHandler) Login(c echo.Context) error {
 	}
 
 	claims := jwt.MapClaims{
-		"id": response.Id,
+		"id":   response.Id,
+		"role": response.Role,
 	}
 
 	token, err := helper.GenerateJWTTokenWithClaims(claims)
@@ -94,83 +108,152 @@ func (u *UserHandler) GetInfoCustomer(c echo.Context) error {
 	}
 
 	return c.JSON(200, echo.Map{
-		"message": "user information retrieved successfully",
+		"user": response,
+	})
+}
+
+func (u *UserHandler) UpdateCustomer(c echo.Context) error {
+	userID := c.Get("id").(string)
+
+	var updateRequest pb.UpdateCustomerRequest
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid update request payload",
+		})
+	}
+
+	response, err := u.userGRPC.UpdateCustomer(context.TODO(), &pb.UpdateCustomerRequest{
+		Id:       userID,
+		Name:     updateRequest.Name,
+		Email:    updateRequest.Email,
+		Password: updateRequest.Password,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to update user",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "customer updated successfully",
 		"user":    response,
 	})
 }
 
-// func (u *UserHandler) UpdateUser(c echo.Context) error {
-// 	userID := c.Get("id").(string)
+func (u *UserHandler) DeleteCustomer(c echo.Context) error {
+	userID := c.Get("id").(string)
 
-// 	var updateRequest pb.UpdateUserRequest
-// 	if err := c.Bind(&updateRequest); err != nil {
-// 		return c.JSON(400, helper.Response{
-// 			Message: "invalid update request payload",
-// 		})
-// 	}
+	response, err := u.userGRPC.DeleteCustomer(context.TODO(), &pb.DeleteCustomerRequest{
+		Id: userID,
+	})
 
-// 	response, err := u.userGRPC.UpdateUser(context.TODO(), &pb.UpdateUserRequest{
-// 		Id:       userID,
-// 		Username: updateRequest.Username,
-// 		Password: updateRequest.Password,
-// 	})
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to delete user",
+		})
+	}
 
-// 	if err != nil {
-// 		return c.JSON(500, helper.Response{
-// 			Message: "failed to update user",
-// 		})
-// 	}
+	return c.JSON(200, echo.Map{
+		"message": "user deleted successfully",
+		"user":    response,
+	})
+}
 
-// 	return c.JSON(200, echo.Map{
-// 		"message": "user information retrieved successfully",
-// 		"user":    response,
-// 	})
-// }
+func (u *UserHandler) AddAddress(c echo.Context) error {
+	userID := c.Get("id").(string)
 
-// func (u *UserHandler) DeleteUser(c echo.Context) error {
-// 	userID := c.Get("id").(string)
+	uID, _ := strconv.Atoi(userID)
 
-// 	response, err := u.userGRPC.DeleteUser(context.TODO(), &pb.DeleteUserRequest{
-// 		Id: userID,
-// 	})
+	user := model.User{
+		Id: uID,
+	}
 
-// 	if err != nil {
-// 		return c.JSON(500, helper.Response{
-// 			Message: "failed to delete user",
-// 		})
-// 	}
+	if user.AddressID != 0 {
+		return c.JSON(400, helper.Response{
+			Message: "address already exist",
+		})
+	}
 
-// 	return c.JSON(200, echo.Map{
-// 		"message": "user deleted successfully",
-// 		"user":    response,
-// 	})
-// }
+	var payload model.Address
+	if err := c.Bind(&payload); err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid update request payload",
+		})
+	}
 
-// func (u *UserHandler) AddTask(c echo.Context) error {
-// 	userID := c.Get("id").(string)
+	in := pb.AddAddressRequest{
+		UserId:  userID,
+		Address: payload.Address,
+		Regency: payload.Regency,
+		City:    payload.City,
+	}
 
-// 	var addTaskRequest pb.AddTaskRequest
-// 	if err := c.Bind(&addTaskRequest); err != nil {
-// 		return c.JSON(400, helper.Response{
-// 			Message: "invalid add task request payload",
-// 		})
-// 	}
+	if payload.Address == "" || payload.Regency == "" || payload.City == "" {
+		return c.JSON(400, helper.Response{
+			Message: "address, regency, and city are required",
+		})
+	}
 
-// 	response, err := u.userGRPC.AddTask(context.TODO(), &pb.AddTaskRequest{
-// 		UserId:      userID,
-// 		Title:       addTaskRequest.Title,
-// 		Description: addTaskRequest.Description,
-// 		DueDate:     addTaskRequest.DueDate,
-// 	})
+	response, err := u.userGRPC.AddAddress(context.TODO(), &in)
 
-// 	if err != nil {
-// 		return c.JSON(500, helper.Response{
-// 			Message: "failed to add task",
-// 		})
-// 	}
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to add address",
+			Detail:  err.Error(),
+		})
+	}
 
-// 	return c.JSON(200, echo.Map{
-// 		"message": "user information retrieved successfully",
-// 		"task":    response,
-// 	})
-// }
+	return c.JSON(201, echo.Map{
+		"message": "address created successfully",
+		"address": response,
+	})
+}
+
+func (u *UserHandler) UpdateAddress(c echo.Context) error {
+	userID := c.Get("id").(string)
+
+	uID, _ := strconv.Atoi(userID)
+
+	user := model.User{
+		Id: uID,
+	}
+
+	if user.AddressID != 0 {
+		return c.JSON(400, helper.Response{
+			Message: "address not found",
+		})
+	}
+
+	var updateRequest pb.UpdateAddressRequest
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid update request payload",
+		})
+	}
+
+	if updateRequest.Address == "" || updateRequest.Regency == "" || updateRequest.City == "" {
+		return c.JSON(400, helper.Response{
+			Message: "address, regency, and city are required",
+		})
+	}
+
+	response, err := u.userGRPC.UpdateAddress(context.TODO(), &pb.UpdateAddressRequest{
+		UserId:  userID,
+		Address: updateRequest.Address,
+		Regency: updateRequest.Regency,
+		City:    updateRequest.City,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to update address",
+			Detail:  err.Error(),
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Message: "address updated successfully",
+		Detail:  response,
+	})
+}
