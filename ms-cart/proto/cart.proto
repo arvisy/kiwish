@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option go_package = "ms-cart/pb";
+
+message Cart {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 product_id = 3;
+  int64 quantity = 4;
+}
+
+message CreateCartRequest {
+  int64 user_id = 1;
+  int64 product_id = 2;
+  int64 quantity = 3;
+}
+
+message CreateCartResponse {
+  Cart cart = 1;
+  string message = 2;
+}
+
+message GetAllCartRequest { int64 user_id = 1; }
+message GetAllCartResponse { repeated Cart carts = 1; }
+
+message UpadateCartRequest {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 quantity = 3;
+}
+
+message UpdateCartResponse {
+  Cart cart = 1;
+  string message = 2;
+}
+
+message DeleteOneCartRequest {
+  int64 id = 1;
+  int64 user_id = 2;
+}
+
+message DeleteOneCartResponse {
+  Cart cart = 1;
+  string message = 2;
+}
+
+message DeleteAllCartRequest { int64 user_id = 1; }
+
+message DeleteAllCartResponse {
+  repeated int64 id = 1;
+  string message = 2;
+}
+
+service CartService {
+  rpc Create(CreateCartRequest) returns (CreateCartResponse) {}
+  rpc GetAll(GetAllCartRequest) returns (GetAllCartResponse) {}
+  rpc Update(UpadateCartRequest) returns (UpdateCartResponse) {}
+  rpc DeleteOne(DeleteOneCartRequest) returns (DeleteOneCartResponse) {}
+  rpc DeleteAll(DeleteAllCartRequest) returns (DeleteAllCartResponse) {}
+}
