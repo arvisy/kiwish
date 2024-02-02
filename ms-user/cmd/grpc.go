@@ -18,7 +18,7 @@ func InitGrpc(UserHandler handler.UserHandler) {
 		log.Println(err)
 	}
 
-	log.Println("Server listening on :50001")
+	log.Println("gRPC [ms-user] started on :50001")
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		log.Println(err)

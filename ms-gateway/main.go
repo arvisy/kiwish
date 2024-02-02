@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"ms-gateway/handler"
+	"ms-gateway/middleware"
 	pb "ms-gateway/pb"
 	routes "ms-gateway/router"
 
@@ -42,6 +43,15 @@ func main() {
 	// 	public.POST("/login", u.Login)
 	// }
 
+	private := e.Group("/api")
+	private.Use(middleware.Authentication)
+	{
+		private.GET("/user", u.GetInfoCustomer)
+		private.PUT("/user", u.UpdateCustomer)
+		private.DELETE("/user", u.DeleteCustomer)
+		private.POST("/user/address", u.AddAddress)
+		// private.PUT("/user/address", )
+	}
 	// private := e.Group("")
 	// // private.Use(middleware.Authentication)
 	// {

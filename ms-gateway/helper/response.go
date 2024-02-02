@@ -2,5 +2,5 @@ package helper
 
 type Response struct {
 	Message string `json:"message"`
-	Detail  string `json:"detail,omitempty"`
+	Detail  any    `json:"detail,omitempty"`
 }

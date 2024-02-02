@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"ms-user/model"
 
 	"golang.org/x/crypto/bcrypt"
@@ -25,13 +26,34 @@ func (u *UserRepository) AddUser(user model.User) error {
 	return nil
 }
 
-func (u *UserRepository) AddAddress(address model.Address) error {
-	_, err := u.DB.Exec("INSERT INTO address(id, user_id, address, regency, city) VALUES($1, $2, $3, $4, $5)", address.Id, address.UserID, address.Address, address.Regency, address.City)
+func (u *UserRepository) SetAddressCustomer(user model.User, addressID int) error {
+	query := "UPDATE users SET address_id=$1 WHERE id=$2"
+	_, err := u.DB.Exec(query, addressID, user.Id)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return nil
+}
+
+func (u *UserRepository) UpdateAddress(addressID int, address model.Address) error {
+	query := "UPDATE address SET address=$1, regency=$2, city=$3 WHERE id=$4"
+	_, err := u.DB.Exec(query, address.Address, address.Regency, address.City, addressID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
+}
+
+func (u *UserRepository) AddAddress(address model.Address) (int, error) {
+	var id int
+	err := u.DB.QueryRow("INSERT INTO address(address, regency, city) VALUES($1, $2, $3) RETURNING id", address.Address, address.Regency, address.City).Scan(&id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return id, nil
 }
 
 func (u *UserRepository) GetCustomer(user *model.User) error {
@@ -50,7 +72,7 @@ func (u *UserRepository) GetCustomer(user *model.User) error {
 
 func (u *UserRepository) UpdateCustomer(userID int, customer model.User) error {
 	query := "UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4"
-	_, err := u.DB.Exec(query)
+	_, err := u.DB.Exec(query, customer.Name, customer.Email, customer.Password, userID)
 	if err != nil {
 		panic(err)
 	}

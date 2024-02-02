@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"log"
 	"ms-user/model"
 	pb "ms-user/pb"
 	"ms-user/repository"
@@ -54,10 +55,12 @@ func (u *UserHandler) Login(ctx context.Context, in *pb.LoginRequest) (*pb.Login
 		return nil, errors.New("user not found")
 	}
 
-	intConv := strconv.Itoa(user.Id)
+	intUserConv := strconv.Itoa(user.Id)
+	intRoleConv := strconv.Itoa(user.RoleID)
 
 	return &pb.LoginResponse{
-		Id:    intConv,
+		Id:    intUserConv,
+		Role:  intRoleConv,
 		Name:  user.Name,
 		Email: user.Email,
 	}, nil
@@ -89,6 +92,111 @@ func (u *UserHandler) GetCustomer(ctx context.Context, in *pb.GetCustomerRequest
 	}, nil
 }
 
-// func (u *UserHandler) UpdateCustomer(ctx context.Context, in *pb.UpdateCustomerRequest) (*pb.UpdateCustomerResponse, error) {
+func (u *UserHandler) UpdateCustomer(ctx context.Context, in *pb.UpdateCustomerRequest) (*pb.UpdateCustomerResponse, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
 
-// }
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id:       strCon,
+		Name:     in.Name,
+		Email:    in.Email,
+		Password: string(hashedPassword),
+	}
+
+	err = u.UserRepository.UpdateCustomer(user.Id, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateCustomerResponse{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}, nil
+}
+
+func (u *UserHandler) DeleteCustomer(ctx context.Context, in *pb.DeleteCustomerRequest) (*pb.Empty, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	err = u.UserRepository.Delete(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Empty{}, nil
+}
+
+func (u *UserHandler) AddAddress(ctx context.Context, in *pb.AddAddressRequest) (*pb.AddAddressResponse, error) {
+	strCon, err := strconv.Atoi(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	address := model.Address{
+		Address: in.Address,
+		Regency: in.Regency,
+		City:    in.City,
+	}
+
+	addressID, err := u.UserRepository.AddAddress(address)
+	if err != nil {
+		panic(err)
+	}
+
+	err = u.UserRepository.SetAddressCustomer(user, addressID)
+	if err != nil {
+		panic(err)
+	}
+
+	return &pb.AddAddressResponse{
+		Address: address.Address,
+		Regency: address.Regency,
+		City:    address.City,
+	}, nil
+}
+
+func (u *UserHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressRequest) (*pb.UpdateAddressResponse, error) {
+	strCon, err := strconv.Atoi(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	address := model.Address{
+		Address: in.Address,
+		Regency: in.Regency,
+		City:    in.City,
+	}
+
+	err = u.UserRepository.UpdateAddress(user.Id, address)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &pb.UpdateAddressResponse{
+		Address: address.Address,
+		Regency: address.Regency,
+		City:    address.City,
+	}, nil
+}
