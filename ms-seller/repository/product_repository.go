@@ -2,31 +2,11 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"ms-seller/model"
 )
 
-type ProductRepository interface {
-	Create(input *model.Product) (*model.Product, error)
-	ReadAll(sellerID int) ([]*model.Product, error)
-	ReadID(productID int) (*model.Product, error)
-	ReadCategory(categoryName string) ([]*model.Product, error)
-	Delete(productID int, sellerID int) error
-	Update(input *model.Product) error
-}
-
-type postgresRepository struct {
-	DB *sql.DB
-}
-
-func NewPostgresRepository(db *sql.DB) *postgresRepository {
-	return &postgresRepository{
-		DB: db,
-	}
-}
-
-func (us *postgresRepository) Create(input *model.Product) (*model.Product, error) {
+func (us *postgresRepository) CreateProduct(input *model.Product) (*model.Product, error) {
 	query := `INSERT INTO products (seller_id, name, price, stock, category_id, discount) 
 	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
 
@@ -47,10 +27,11 @@ func (us *postgresRepository) Create(input *model.Product) (*model.Product, erro
 	return input, nil
 }
 
-func (us *postgresRepository) ReadAll(sellerID int) ([]*model.Product, error) {
+// tambahin category name
+func (po *postgresRepository) ReadAllProducts(sellerID int) ([]*model.Product, error) {
 	query := `SELECT * FROM products WHERE seller_id = $1`
 
-	rows, err := us.DB.QueryContext(context.Background(), query, sellerID)
+	rows, err := po.DB.QueryContext(context.Background(), query, sellerID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +59,12 @@ func (us *postgresRepository) ReadAll(sellerID int) ([]*model.Product, error) {
 	return products, nil
 }
 
-func (us *postgresRepository) ReadID(productID int) (*model.Product, error) {
+// tambahin category name
+func (po *postgresRepository) ReadProductID(productID int) (*model.Product, error) {
 	query := `SELECT * FROM products WHERE id = $1;`
 
 	var product model.Product
-	row := us.DB.QueryRow(query, productID)
+	row := po.DB.QueryRow(query, productID)
 
 	err := row.Scan(
 		&product.ID,
@@ -100,12 +82,13 @@ func (us *postgresRepository) ReadID(productID int) (*model.Product, error) {
 	return &product, nil
 }
 
-func (us *postgresRepository) ReadCategory(categoryName string) ([]*model.Product, error) {
+// tambahin category name
+func (po *postgresRepository) ReadProductCategory(categoryName string) ([]*model.Product, error) {
 	query := `SELECT products.id, products.seller_id, products.name, products.price, products.stock, products.category_id, products.discount FROM products
 			JOIN categories ON products.category_id = categories.id
 			WHERE categories."name" = $1`
 
-	rows, err := us.DB.QueryContext(context.Background(), query, categoryName)
+	rows, err := po.DB.QueryContext(context.Background(), query, categoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -133,10 +116,10 @@ func (us *postgresRepository) ReadCategory(categoryName string) ([]*model.Produc
 	return products, nil
 }
 
-func (us *postgresRepository) Delete(productID int, sellerID int) error {
+func (po *postgresRepository) DeleteProduct(productID int, sellerID int) error {
 	query := `DELETE FROM products WHERE id = $1 AND seller_id = $2`
 
-	result, err := us.DB.Exec(query, productID, sellerID)
+	result, err := po.DB.Exec(query, productID, sellerID)
 	if err != nil {
 		return err
 	}
@@ -148,7 +131,7 @@ func (us *postgresRepository) Delete(productID int, sellerID int) error {
 }
 
 // TODO: tambah fitur update beberapa fild saja
-func (t *postgresRepository) Update(input *model.Product) error {
+func (po *postgresRepository) UpdateProduct(input *model.Product) error {
 	query := `UPDATE products SET 
 				name = $1,
 				price = $2,
@@ -158,7 +141,7 @@ func (t *postgresRepository) Update(input *model.Product) error {
 			WHERE id = $6 AND seller_id = $7;
 			`
 
-	_, err := t.DB.Exec(query, input.Name, input.Price, input.Stock, input.Category_id, input.Discount, input.ID, input.SellerID)
+	_, err := po.DB.Exec(query, input.Name, input.Price, input.Stock, input.Category_id, input.Discount, input.ID, input.SellerID)
 	if err != nil {
 		return err
 	}

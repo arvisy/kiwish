@@ -13,10 +13,53 @@ service SellerService {
     rpc DeleteProduct (DeleteProductRequest) returns (google.protobuf.Empty);
     rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
 
-    // merchant
+    // seller
+    rpc AddSellerWithAddress (AddSellerWithAddressRequest) returns (SellerDetailResponse);
+    rpc GetAllSellers (google.protobuf.Empty) returns (GetSellersResponse);
+    rpc GetSellerByID (GetSellerByIDRequest) returns (SellerDetailResponse);
+    rpc GetSellerByName (GetSellerByNameRequest) returns (SellerDetailResponse);
+    rpc UpdateAddress (UpdateSellerAddressRequest) returns (AddressResponse);
+    rpc UpdateSellerName (UpdateSellerNameRequest) returns (google.protobuf.Empty);
+    rpc UpdateSellerActivity (UpdateSellerActivityRequest) returns (google.protobuf.Empty);
 }
 
 // Request
+
+// seller
+message AddSellerWithAddressRequest {
+    int32 seller_id = 1;
+    string name = 2;
+    int32 address_id = 3;
+    string address_name = 4;
+    string address_regency = 5;
+    string address_city = 6;
+}
+
+message GetSellerByIDRequest {
+    int32 seller_id = 1;
+}
+message GetSellerByNameRequest {
+    string name = 1;
+}
+
+message UpdateSellerAddressRequest {
+    int32 address_id = 1;
+    string address_name = 2;
+    string address_regency = 3;
+    string address_city = 4;
+}
+
+message UpdateSellerNameRequest {
+    int32 seller_id = 1;
+    string name = 2;
+}
+
+message UpdateSellerActivityRequest {
+    int32 seller_id = 1;
+}
+
+
+// product
 message AddProductRequest {
     int32 seller_id = 1;
     string name = 2;
@@ -53,7 +96,10 @@ message UpdateProductRequest {
     int32 discount = 7;
 }
 
+
 // Response
+
+// product
 message ProductResponse {
     int32 productid = 1;
     int32 seller_id = 2;
@@ -68,4 +114,31 @@ message GetProductsResponse {
     repeated ProductResponse Products = 1;
 }
 
+// seller
+message SellerResponse {
+    int32 seller_id = 1;
+    string name = 2;
+    string last_active = 3;
+    int32 address_id = 4;
+}
 
+message GetSellersResponse {
+    repeated SellerResponse Sellers = 1;
+}
+
+message SellerDetailResponse {
+    int32 seller_id = 1;
+    string name = 2;
+    string last_active = 3;
+    int32 address_id = 4;
+    string address_name = 5;
+    string address_regency = 6;
+    string address_city = 7;
+}
+
+message AddressResponse {
+    int32 address_id = 1;
+    string address_name = 2;
+    string address_regency = 3;
+    string address_city = 4;
+}

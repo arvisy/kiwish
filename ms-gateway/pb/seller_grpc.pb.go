@@ -30,6 +30,14 @@ type SellerServiceClient interface {
 	GetProductByID(ctx context.Context, in *GetProductByIDRequest, opts ...grpc.CallOption) (*ProductResponse, error)
 	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*ProductResponse, error)
+	// seller
+	AddSellerWithAddress(ctx context.Context, in *AddSellerWithAddressRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
+	GetAllSellers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSellersResponse, error)
+	GetSellerByID(ctx context.Context, in *GetSellerByIDRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
+	GetSellerByName(ctx context.Context, in *GetSellerByNameRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
+	UpdateAddress(ctx context.Context, in *UpdateSellerAddressRequest, opts ...grpc.CallOption) (*AddressResponse, error)
+	UpdateSellerName(ctx context.Context, in *UpdateSellerNameRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateSellerActivity(ctx context.Context, in *UpdateSellerActivityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type sellerServiceClient struct {
@@ -94,6 +102,69 @@ func (c *sellerServiceClient) UpdateProduct(ctx context.Context, in *UpdateProdu
 	return out, nil
 }
 
+func (c *sellerServiceClient) AddSellerWithAddress(ctx context.Context, in *AddSellerWithAddressRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error) {
+	out := new(SellerDetailResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/AddSellerWithAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) GetAllSellers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSellersResponse, error) {
+	out := new(GetSellersResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/GetAllSellers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) GetSellerByID(ctx context.Context, in *GetSellerByIDRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error) {
+	out := new(SellerDetailResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/GetSellerByID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) GetSellerByName(ctx context.Context, in *GetSellerByNameRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error) {
+	out := new(SellerDetailResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/GetSellerByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) UpdateAddress(ctx context.Context, in *UpdateSellerAddressRequest, opts ...grpc.CallOption) (*AddressResponse, error) {
+	out := new(AddressResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/UpdateAddress", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) UpdateSellerName(ctx context.Context, in *UpdateSellerNameRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/UpdateSellerName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) UpdateSellerActivity(ctx context.Context, in *UpdateSellerActivityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/UpdateSellerActivity", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SellerServiceServer is the server API for SellerService service.
 // All implementations must embed UnimplementedSellerServiceServer
 // for forward compatibility
@@ -105,6 +176,14 @@ type SellerServiceServer interface {
 	GetProductByID(context.Context, *GetProductByIDRequest) (*ProductResponse, error)
 	DeleteProduct(context.Context, *DeleteProductRequest) (*emptypb.Empty, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*ProductResponse, error)
+	// seller
+	AddSellerWithAddress(context.Context, *AddSellerWithAddressRequest) (*SellerDetailResponse, error)
+	GetAllSellers(context.Context, *emptypb.Empty) (*GetSellersResponse, error)
+	GetSellerByID(context.Context, *GetSellerByIDRequest) (*SellerDetailResponse, error)
+	GetSellerByName(context.Context, *GetSellerByNameRequest) (*SellerDetailResponse, error)
+	UpdateAddress(context.Context, *UpdateSellerAddressRequest) (*AddressResponse, error)
+	UpdateSellerName(context.Context, *UpdateSellerNameRequest) (*emptypb.Empty, error)
+	UpdateSellerActivity(context.Context, *UpdateSellerActivityRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSellerServiceServer()
 }
 
@@ -129,6 +208,27 @@ func (UnimplementedSellerServiceServer) DeleteProduct(context.Context, *DeletePr
 }
 func (UnimplementedSellerServiceServer) UpdateProduct(context.Context, *UpdateProductRequest) (*ProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
+}
+func (UnimplementedSellerServiceServer) AddSellerWithAddress(context.Context, *AddSellerWithAddressRequest) (*SellerDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSellerWithAddress not implemented")
+}
+func (UnimplementedSellerServiceServer) GetAllSellers(context.Context, *emptypb.Empty) (*GetSellersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllSellers not implemented")
+}
+func (UnimplementedSellerServiceServer) GetSellerByID(context.Context, *GetSellerByIDRequest) (*SellerDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSellerByID not implemented")
+}
+func (UnimplementedSellerServiceServer) GetSellerByName(context.Context, *GetSellerByNameRequest) (*SellerDetailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSellerByName not implemented")
+}
+func (UnimplementedSellerServiceServer) UpdateAddress(context.Context, *UpdateSellerAddressRequest) (*AddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAddress not implemented")
+}
+func (UnimplementedSellerServiceServer) UpdateSellerName(context.Context, *UpdateSellerNameRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSellerName not implemented")
+}
+func (UnimplementedSellerServiceServer) UpdateSellerActivity(context.Context, *UpdateSellerActivityRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSellerActivity not implemented")
 }
 func (UnimplementedSellerServiceServer) mustEmbedUnimplementedSellerServiceServer() {}
 
@@ -251,6 +351,132 @@ func _SellerService_UpdateProduct_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SellerService_AddSellerWithAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddSellerWithAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).AddSellerWithAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/AddSellerWithAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).AddSellerWithAddress(ctx, req.(*AddSellerWithAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_GetAllSellers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).GetAllSellers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/GetAllSellers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).GetAllSellers(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_GetSellerByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSellerByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).GetSellerByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/GetSellerByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).GetSellerByID(ctx, req.(*GetSellerByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_GetSellerByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSellerByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).GetSellerByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/GetSellerByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).GetSellerByName(ctx, req.(*GetSellerByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_UpdateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSellerAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).UpdateAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/UpdateAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).UpdateAddress(ctx, req.(*UpdateSellerAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_UpdateSellerName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSellerNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).UpdateSellerName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/UpdateSellerName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).UpdateSellerName(ctx, req.(*UpdateSellerNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_UpdateSellerActivity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSellerActivityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).UpdateSellerActivity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/UpdateSellerActivity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).UpdateSellerActivity(ctx, req.(*UpdateSellerActivityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SellerService_ServiceDesc is the grpc.ServiceDesc for SellerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -281,6 +507,34 @@ var SellerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProduct",
 			Handler:    _SellerService_UpdateProduct_Handler,
+		},
+		{
+			MethodName: "AddSellerWithAddress",
+			Handler:    _SellerService_AddSellerWithAddress_Handler,
+		},
+		{
+			MethodName: "GetAllSellers",
+			Handler:    _SellerService_GetAllSellers_Handler,
+		},
+		{
+			MethodName: "GetSellerByID",
+			Handler:    _SellerService_GetSellerByID_Handler,
+		},
+		{
+			MethodName: "GetSellerByName",
+			Handler:    _SellerService_GetSellerByName_Handler,
+		},
+		{
+			MethodName: "UpdateAddress",
+			Handler:    _SellerService_UpdateAddress_Handler,
+		},
+		{
+			MethodName: "UpdateSellerName",
+			Handler:    _SellerService_UpdateSellerName_Handler,
+		},
+		{
+			MethodName: "UpdateSellerActivity",
+			Handler:    _SellerService_UpdateSellerActivity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,7 +2,7 @@ CREATE TABLE "sellers" (
   "id" int PRIMARY KEY,
   "name" varchar NOT NULL UNIQUE,
   "address_id" int NOT NULL,
-  "last_active" date NOT NULL
+  "last_active" date 
 );
 
 CREATE TABLE "address" (
