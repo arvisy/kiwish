@@ -3,24 +3,24 @@ package service
 import (
 	"context"
 	"ms-seller/model"
-	pb "ms-seller/proto"
+	"ms-seller/pb"
 	"ms-seller/repository"
 
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type ProductService struct {
+type SellerService struct {
 	ProductRepository repository.ProductRepository
-	pb.UnimplementedProductServiceServer
+	pb.UnimplementedSellerServiceServer
 }
 
-func NewProductService(ProductRepository repository.ProductRepository) *ProductService {
-	return &ProductService{
+func NewSellerService(ProductRepository repository.ProductRepository) *SellerService {
+	return &SellerService{
 		ProductRepository: ProductRepository,
 	}
 }
 
-func (h *ProductService) AddProduct(ctx context.Context, in *pb.AddProductRequest) (*pb.ProductResponse, error) {
+func (h *SellerService) AddProduct(ctx context.Context, in *pb.AddProductRequest) (*pb.ProductResponse, error) {
 	var input = model.Product{
 		SellerID:    int(in.SellerId),
 		Name:        in.Name,
@@ -38,6 +38,7 @@ func (h *ProductService) AddProduct(ctx context.Context, in *pb.AddProductReques
 	var response = &pb.ProductResponse{
 		Productid:  int32(product.ID),
 		SellerId:   int32(product.SellerID),
+		Name:       product.Name,
 		Price:      float32(product.Price),
 		Stock:      int32(product.Stock),
 		CategoryId: int32(product.Category_id),
@@ -47,18 +48,19 @@ func (h *ProductService) AddProduct(ctx context.Context, in *pb.AddProductReques
 	return response, nil
 }
 
-func (h *ProductService) GetProducts(ctx context.Context, in *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
-	Products, err := h.ProductRepository.ReadAll(int(in.SellerId))
+func (h *SellerService) GetProductsBySeller(ctx context.Context, in *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
+	products, err := h.ProductRepository.ReadAll(int(in.SellerId))
 	if err != nil {
 		return nil, err
 	}
 
 	var list []*pb.ProductResponse
 
-	for _, v := range Products {
+	for _, v := range products {
 		u := pb.ProductResponse{
 			Productid:  int32(v.ID),
 			SellerId:   int32(v.SellerID),
+			Name:       v.Name,
 			Price:      float32(v.Price),
 			Stock:      int32(v.Stock),
 			CategoryId: int32(v.Category_id),
@@ -72,8 +74,8 @@ func (h *ProductService) GetProducts(ctx context.Context, in *pb.GetProductsRequ
 	}, nil
 }
 
-func (t *ProductService) GetProductByID(ctx context.Context, in *pb.GetProductByIDRequest) (*pb.ProductResponse, error) {
-	product, err := t.ProductRepository.ReadID(int(in.Productid), int(in.SellerId))
+func (t *SellerService) GetProductByID(ctx context.Context, in *pb.GetProductByIDRequest) (*pb.ProductResponse, error) {
+	product, err := t.ProductRepository.ReadID(int(in.ProductId))
 	if err != nil {
 		return nil, err
 	}
@@ -82,6 +84,7 @@ func (t *ProductService) GetProductByID(ctx context.Context, in *pb.GetProductBy
 		Productid:  int32(product.ID),
 		SellerId:   int32(product.SellerID),
 		Price:      float32(product.Price),
+		Name:       product.Name,
 		Stock:      int32(product.Stock),
 		CategoryId: int32(product.Category_id),
 		Discount:   int32(product.Discount),
@@ -90,7 +93,33 @@ func (t *ProductService) GetProductByID(ctx context.Context, in *pb.GetProductBy
 	return response, nil
 }
 
-func (t *ProductService) DeleteProduct(ctx context.Context, in *pb.DeleteProductRequest) (*emptypb.Empty, error) {
+func (t *SellerService) GetProductsByCategory(ctx context.Context, in *pb.GetProductByCategoryRequest) (*pb.GetProductsResponse, error) {
+	products, err := t.ProductRepository.ReadCategory(in.CategoryName)
+	if err != nil {
+		return nil, err
+	}
+
+	var list []*pb.ProductResponse
+
+	for _, v := range products {
+		u := pb.ProductResponse{
+			Productid:  int32(v.ID),
+			SellerId:   int32(v.SellerID),
+			Name:       v.Name,
+			Price:      float32(v.Price),
+			Stock:      int32(v.Stock),
+			CategoryId: int32(v.Category_id),
+			Discount:   int32(v.Discount),
+		}
+		list = append(list, &u)
+	}
+
+	return &pb.GetProductsResponse{
+		Products: list,
+	}, nil
+}
+
+func (t *SellerService) DeleteProduct(ctx context.Context, in *pb.DeleteProductRequest) (*emptypb.Empty, error) {
 	err := t.ProductRepository.Delete(int(in.Productid), int(in.SellerId))
 	if err != nil {
 		return nil, err
@@ -99,7 +128,7 @@ func (t *ProductService) DeleteProduct(ctx context.Context, in *pb.DeleteProduct
 	return &emptypb.Empty{}, nil
 }
 
-func (t *ProductService) UpdateProduct(ctx context.Context, in *pb.UpdateProductRequest) (*pb.ProductResponse, error) {
+func (t *SellerService) UpdateProduct(ctx context.Context, in *pb.UpdateProductRequest) (*pb.ProductResponse, error) {
 	var product = model.Product{
 		SellerID:    int(in.SellerId),
 		Name:        in.Name,
@@ -117,6 +146,7 @@ func (t *ProductService) UpdateProduct(ctx context.Context, in *pb.UpdateProduct
 	var response = &pb.ProductResponse{
 		Productid:  int32(product.ID),
 		SellerId:   int32(product.SellerID),
+		Name:       product.Name,
 		Price:      float32(product.Price),
 		Stock:      int32(product.Stock),
 		CategoryId: int32(product.Category_id),

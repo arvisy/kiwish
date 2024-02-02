@@ -10,7 +10,7 @@ import (
 type ProductRepository interface {
 	Create(input *model.Product) (*model.Product, error)
 	ReadAll(sellerID int) ([]*model.Product, error)
-	ReadID(productID int, sellerID int) (*model.Product, error)
+	ReadID(productID int) (*model.Product, error)
 	ReadCategory(categoryName string) ([]*model.Product, error)
 	Delete(productID int, sellerID int) error
 	Update(input *model.Product) error
@@ -78,11 +78,11 @@ func (us *postgresRepository) ReadAll(sellerID int) ([]*model.Product, error) {
 	return products, nil
 }
 
-func (us *postgresRepository) ReadID(productID int, sellerID int) (*model.Product, error) {
-	query := `SELECT * FROM products WHERE id = $1 AND seller_id = $2;`
+func (us *postgresRepository) ReadID(productID int) (*model.Product, error) {
+	query := `SELECT * FROM products WHERE id = $1;`
 
 	var product model.Product
-	row := us.DB.QueryRow(query, productID, sellerID)
+	row := us.DB.QueryRow(query, productID)
 
 	err := row.Scan(
 		&product.ID,
@@ -101,9 +101,11 @@ func (us *postgresRepository) ReadID(productID int, sellerID int) (*model.Produc
 }
 
 func (us *postgresRepository) ReadCategory(categoryName string) ([]*model.Product, error) {
-	query := `SELECT * FROM products WHERE seller_id = $1`
+	query := `SELECT products.id, products.seller_id, products.name, products.price, products.stock, products.category_id, products.discount FROM products
+			JOIN categories ON products.category_id = categories.id
+			WHERE categories."name" = $1`
 
-	rows, err := us.DB.QueryContext(context.Background(), query, sellerID)
+	rows, err := us.DB.QueryContext(context.Background(), query, categoryName)
 	if err != nil {
 		return nil, err
 	}

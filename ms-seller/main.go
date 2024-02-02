@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"ms-seller/config"
-	pb "ms-seller/proto"
+	"ms-seller/pb"
 	"ms-seller/repository"
 	"ms-seller/service"
 	"net"
@@ -25,10 +25,10 @@ func main() {
 	defer db.Close()
 
 	postgresRepo := repository.NewPostgresRepository(db)
-	productService := service.NewProductService(postgresRepo)
+	sellerService := service.NewSellerService(postgresRepo)
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterProductServiceServer(grpcServer, productService)
+	pb.RegisterSellerServiceServer(grpcServer, sellerService)
 
 	listen, err := net.Listen("tcp", ":50002")
 	if err != nil {
