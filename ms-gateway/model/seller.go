@@ -17,3 +17,7 @@ type ProductInput struct {
 	Category_id int     `json:"category_id"`
 	Discount    int     `json:"discount"`
 }
+
+type SellerID struct {
+	ID int `json:"seller_id"`
+}

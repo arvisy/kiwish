@@ -37,12 +37,6 @@ func main() {
 	// e.Use(middleware.Logger())
 	// e.Use(middleware.Recover())
 
-	// public := e.Group("/user")
-	// {
-	// 	public.POST("/register", u.Register)
-	// 	public.POST("/login", u.Login)
-	// }
-
 	private := e.Group("/api")
 	private.Use(middleware.Authentication)
 	{
