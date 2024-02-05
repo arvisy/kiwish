@@ -9,7 +9,7 @@ CREATE TABLE "users" (
   "name" varchar NOT NULL,
   "email" varchar NOT NULL UNIQUE,
   "password" varchar NOT NULL,
-  "address_id" int NOT NULL
+  "address_id" int
 );
 
 CREATE TABLE "address" (

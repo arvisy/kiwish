@@ -26,9 +26,9 @@ func main() {
 	defer sellerConn.Close()
 
 	userService := pb.NewUserServiceClient(userConn)
-	u := handler.NewUserHandler(userService)
-
 	sellerService := pb.NewSellerServiceClient(sellerConn)
+
+	u := handler.NewUserHandler(userService, sellerService)
 	s := handler.NewSellerHandler(sellerService)
 
 	e := echo.New()
@@ -37,12 +37,6 @@ func main() {
 
 	e.Use(midd.Logger())
 	e.Use(midd.Recover())
-
-	// public := e.Group("/user")
-	// {
-	// 	public.POST("/register", u.Register)
-	// 	public.POST("/login", u.Login)
-	// }
 
 	private := e.Group("/api")
 	private.Use(middleware.Authentication, middleware.CustomerAuth)

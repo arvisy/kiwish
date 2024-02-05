@@ -19,4 +19,23 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 	{
 		u.GET("", user.GetInfoCustomer)
 	}
+
+	p := r.Group("/products")
+	{
+		p.GET("/:id", seller.GetProductByID)
+		p.GET("/category/:category", seller.GetProductsByCategory)
+		p.GET("/seller/:id", seller.GetProductsBySeller)
+	}
+	px := p.Group("")
+	px.Use(middleware.Authentication, middleware.SellerAuth)
+	{
+		px.POST("", seller.AddProduct)
+		px.DELETE("/:id", seller.DeleteProduct)
+	}
+
+	// s := r.Group("/sellers")
+	// {
+	// 	s.POST("", seller.)
+	// }
+
 }
