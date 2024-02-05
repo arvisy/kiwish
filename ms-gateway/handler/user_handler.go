@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"ms-gateway/helper"
 	"ms-gateway/model"
 	pb "ms-gateway/pb"
@@ -80,6 +81,9 @@ func (u *UserHandler) Login(c echo.Context) error {
 		"id":   response.Id,
 		"role": response.Role,
 	}
+
+	fmt.Println("id: ", response.Id)
+	fmt.Println("role: ", response.Role)
 
 	token, err := helper.GenerateJWTTokenWithClaims(claims)
 	if err != nil {
@@ -218,6 +222,8 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 	user := model.User{
 		Id: uID,
 	}
+
+	fmt.Println("address id nya <---", user.AddressID)
 
 	if user.AddressID != 0 {
 		return c.JSON(400, helper.Response{

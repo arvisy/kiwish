@@ -189,7 +189,12 @@ func (u *UserHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressReq
 		City:    in.City,
 	}
 
-	err = u.UserRepository.UpdateAddress(user.Id, address)
+	addressID, err := u.UserRepository.GetAddressID(user.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = u.UserRepository.UpdateAddress(addressID, address)
 	if err != nil {
 		log.Fatal(err)
 	}
