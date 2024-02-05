@@ -1,7 +1,7 @@
 CREATE TABLE "sellers" (
   "id" int PRIMARY KEY,
   "name" varchar NOT NULL UNIQUE,
-  "address_id" int NOT NULL,
+  "address_id" int,
   "last_active" date 
 );
 

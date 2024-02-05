@@ -14,7 +14,8 @@ service SellerService {
     rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
 
     // seller
-    rpc AddSellerWithAddress (AddSellerWithAddressRequest) returns (SellerDetailResponse);
+    rpc AddSeller (AddSellerRequest) returns (SellerResponse);
+    rpc AddSellerAddress (AddSellerAddressRequest) returns (AddressResponse);
     rpc GetAllSellers (google.protobuf.Empty) returns (GetSellersResponse);
     rpc GetSellerByID (GetSellerByIDRequest) returns (SellerDetailResponse);
     rpc GetSellerByName (GetSellerByNameRequest) returns (SellerDetailResponse);
@@ -26,13 +27,16 @@ service SellerService {
 // Request
 
 // seller
-message AddSellerWithAddressRequest {
+message AddSellerRequest {
     int32 seller_id = 1;
     string name = 2;
-    int32 address_id = 3;
-    string address_name = 4;
-    string address_regency = 5;
-    string address_city = 6;
+}
+
+message AddSellerAddressRequest {
+    int32 seller_id = 1;
+    string address_name = 2;
+    string address_regency = 3;
+    string address_city = 4;
 }
 
 message GetSellerByIDRequest {
@@ -99,21 +103,6 @@ message UpdateProductRequest {
 
 // Response
 
-// product
-message ProductResponse {
-    int32 productid = 1;
-    int32 seller_id = 2;
-    string name = 3;
-    float price = 4;
-    int32 stock = 5;
-    int32 category_id = 6;
-    int32 discount = 7;
-}
-
-message GetProductsResponse {
-    repeated ProductResponse Products = 1;
-}
-
 // seller
 message SellerResponse {
     int32 seller_id = 1;
@@ -142,3 +131,19 @@ message AddressResponse {
     string address_regency = 3;
     string address_city = 4;
 }
+
+// product
+message ProductResponse {
+    int32 productid = 1;
+    int32 seller_id = 2;
+    string name = 3;
+    float price = 4;
+    int32 stock = 5;
+    int32 category_id = 6;
+    int32 discount = 7;
+}
+
+message GetProductsResponse {
+    repeated ProductResponse Products = 1;
+}
+

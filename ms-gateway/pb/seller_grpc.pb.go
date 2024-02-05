@@ -31,7 +31,8 @@ type SellerServiceClient interface {
 	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*ProductResponse, error)
 	// seller
-	AddSellerWithAddress(ctx context.Context, in *AddSellerWithAddressRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
+	AddSeller(ctx context.Context, in *AddSellerRequest, opts ...grpc.CallOption) (*SellerResponse, error)
+	AddSellerAddress(ctx context.Context, in *AddSellerAddressRequest, opts ...grpc.CallOption) (*AddressResponse, error)
 	GetAllSellers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSellersResponse, error)
 	GetSellerByID(ctx context.Context, in *GetSellerByIDRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
 	GetSellerByName(ctx context.Context, in *GetSellerByNameRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error)
@@ -102,9 +103,18 @@ func (c *sellerServiceClient) UpdateProduct(ctx context.Context, in *UpdateProdu
 	return out, nil
 }
 
-func (c *sellerServiceClient) AddSellerWithAddress(ctx context.Context, in *AddSellerWithAddressRequest, opts ...grpc.CallOption) (*SellerDetailResponse, error) {
-	out := new(SellerDetailResponse)
-	err := c.cc.Invoke(ctx, "/seller.SellerService/AddSellerWithAddress", in, out, opts...)
+func (c *sellerServiceClient) AddSeller(ctx context.Context, in *AddSellerRequest, opts ...grpc.CallOption) (*SellerResponse, error) {
+	out := new(SellerResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/AddSeller", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sellerServiceClient) AddSellerAddress(ctx context.Context, in *AddSellerAddressRequest, opts ...grpc.CallOption) (*AddressResponse, error) {
+	out := new(AddressResponse)
+	err := c.cc.Invoke(ctx, "/seller.SellerService/AddSellerAddress", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +187,8 @@ type SellerServiceServer interface {
 	DeleteProduct(context.Context, *DeleteProductRequest) (*emptypb.Empty, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*ProductResponse, error)
 	// seller
-	AddSellerWithAddress(context.Context, *AddSellerWithAddressRequest) (*SellerDetailResponse, error)
+	AddSeller(context.Context, *AddSellerRequest) (*SellerResponse, error)
+	AddSellerAddress(context.Context, *AddSellerAddressRequest) (*AddressResponse, error)
 	GetAllSellers(context.Context, *emptypb.Empty) (*GetSellersResponse, error)
 	GetSellerByID(context.Context, *GetSellerByIDRequest) (*SellerDetailResponse, error)
 	GetSellerByName(context.Context, *GetSellerByNameRequest) (*SellerDetailResponse, error)
@@ -209,8 +220,11 @@ func (UnimplementedSellerServiceServer) DeleteProduct(context.Context, *DeletePr
 func (UnimplementedSellerServiceServer) UpdateProduct(context.Context, *UpdateProductRequest) (*ProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
 }
-func (UnimplementedSellerServiceServer) AddSellerWithAddress(context.Context, *AddSellerWithAddressRequest) (*SellerDetailResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddSellerWithAddress not implemented")
+func (UnimplementedSellerServiceServer) AddSeller(context.Context, *AddSellerRequest) (*SellerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSeller not implemented")
+}
+func (UnimplementedSellerServiceServer) AddSellerAddress(context.Context, *AddSellerAddressRequest) (*AddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSellerAddress not implemented")
 }
 func (UnimplementedSellerServiceServer) GetAllSellers(context.Context, *emptypb.Empty) (*GetSellersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllSellers not implemented")
@@ -351,20 +365,38 @@ func _SellerService_UpdateProduct_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SellerService_AddSellerWithAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddSellerWithAddressRequest)
+func _SellerService_AddSeller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddSellerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SellerServiceServer).AddSellerWithAddress(ctx, in)
+		return srv.(SellerServiceServer).AddSeller(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/seller.SellerService/AddSellerWithAddress",
+		FullMethod: "/seller.SellerService/AddSeller",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SellerServiceServer).AddSellerWithAddress(ctx, req.(*AddSellerWithAddressRequest))
+		return srv.(SellerServiceServer).AddSeller(ctx, req.(*AddSellerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SellerService_AddSellerAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddSellerAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SellerServiceServer).AddSellerAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/seller.SellerService/AddSellerAddress",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SellerServiceServer).AddSellerAddress(ctx, req.(*AddSellerAddressRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -509,8 +541,12 @@ var SellerService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SellerService_UpdateProduct_Handler,
 		},
 		{
-			MethodName: "AddSellerWithAddress",
-			Handler:    _SellerService_AddSellerWithAddress_Handler,
+			MethodName: "AddSeller",
+			Handler:    _SellerService_AddSeller_Handler,
+		},
+		{
+			MethodName: "AddSellerAddress",
+			Handler:    _SellerService_AddSellerAddress_Handler,
 		},
 		{
 			MethodName: "GetAllSellers",

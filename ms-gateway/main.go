@@ -26,9 +26,9 @@ func main() {
 	defer sellerConn.Close()
 
 	userService := pb.NewUserServiceClient(userConn)
-	u := handler.NewUserHandler(userService)
-
 	sellerService := pb.NewSellerServiceClient(sellerConn)
+
+	u := handler.NewUserHandler(userService, sellerService)
 	s := handler.NewSellerHandler(sellerService)
 
 	e := echo.New()

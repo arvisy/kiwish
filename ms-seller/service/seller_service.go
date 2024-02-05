@@ -159,7 +159,28 @@ func (se *SellerService) UpdateProduct(ctx context.Context, in *pb.UpdateProduct
 }
 
 // seller service
-func (se *SellerService) AddSellerWithAddress(ctx context.Context, in *pb.AddSellerWithAddressRequest) (*pb.SellerDetailResponse, error) {
+func (se *SellerService) AddSeller(ctx context.Context, in *pb.AddSellerRequest) (*pb.SellerResponse, error) {
+	var sellerInput = model.Seller{
+		ID:         int(in.SellerId), // same as user id
+		Name:       in.Name,
+		LastActive: "",
+	}
+
+	seller, err := se.SellerRepository.CreateSeller(&sellerInput)
+	if err != nil {
+		return nil, err
+	}
+
+	var response = &pb.SellerResponse{
+		SellerId:   int32(seller.ID),
+		Name:       seller.Name,
+		LastActive: seller.LastActive,
+		AddressId:  0,
+	}
+	return response, nil
+}
+
+func (se *SellerService) AddAddress(ctx context.Context, in *pb.AddSellerAddressRequest) (*pb.AddressResponse, error) {
 	var addressInput = model.Address{
 		Name:    in.AddressName,
 		Regency: in.AddressRegency,
@@ -171,22 +192,13 @@ func (se *SellerService) AddSellerWithAddress(ctx context.Context, in *pb.AddSel
 		return nil, err
 	}
 
-	var sellerInput = model.Seller{
-		ID:         int(in.SellerId), // same as user id
-		Name:       in.Name,
-		AddressID:  address.ID,
-		LastActive: "",
-	}
-
-	seller, err := se.SellerRepository.CreateSeller(&sellerInput)
+	// update seller
+	err = se.SellerRepository.UpdateAddressID(address.ID, int(in.SellerId))
 	if err != nil {
 		return nil, err
 	}
 
-	var response = &pb.SellerDetailResponse{
-		SellerId:       int32(seller.ID),
-		Name:           seller.Name,
-		LastActive:     seller.LastActive,
+	var response = &pb.AddressResponse{
 		AddressId:      int32(address.ID),
 		AddressName:    address.Name,
 		AddressRegency: address.Regency,

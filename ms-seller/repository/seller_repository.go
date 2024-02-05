@@ -147,6 +147,19 @@ func (po *postgresRepository) UpdateName(sellerName string, sellerID int) error 
 	return nil
 }
 
+func (po *postgresRepository) UpdateAddressID(addressID int, sellerID int) error {
+	query := `UPDATE sellers SET 
+				address_id = $1,
+			WHERE id = $2;
+			`
+
+	_, err := po.DB.Exec(query, addressID, sellerID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (po *postgresRepository) UpdateActivity(timestamp string, sellerID int) error {
 	query := `UPDATE sellers SET 
 				last_active = $1,

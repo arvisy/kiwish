@@ -18,6 +18,7 @@ type SellerRepository interface {
 	// seller
 	CreateSeller(input *model.Seller) (*model.Seller, error)
 	CreateAddress(input *model.Address) (*model.Address, error)
+	UpdateAddressID(addressID int, sellerID int) error
 	ReadAllSellers() ([]*model.Seller, error)                      // public
 	ReadSellerID(sellerID int) (*model.SellerDetail, error)        // public
 	ReadSellerName(sellerName string) (*model.SellerDetail, error) // public

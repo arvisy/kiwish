@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type SellerHandler struct {
@@ -233,5 +234,151 @@ func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "Product successfully deleted!",
+	})
+}
+
+// seller
+func (h *SellerHandler) AddSeller(c echo.Context) error {
+	var input model.Seller
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	in := pb.AddSellerRequest{
+		SellerId: int32(input.ID),
+		Name:     input.Name,
+	}
+
+	resp, err := h.sellerGRPC.AddSeller(context.Background(), &in)
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": "Seller successfully added!",
+		"seller": model.SellerIDName{
+			ID:   int(resp.SellerId),
+			Name: resp.Name,
+		},
+	})
+}
+
+func (h *SellerHandler) GetAllSellers(c echo.Context) error {
+	resp, err := h.sellerGRPC.GetAllSellers(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	var result []*model.Seller
+	for _, v := range resp.Sellers {
+		s := model.Seller{
+			ID:         int(v.SellerId),
+			Name:       v.Name,
+			LastActive: v.LastActive,
+		}
+		result = append(result, &s)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"sellers": result,
+	})
+}
+
+func (h *SellerHandler) GetSellerByID(c echo.Context) error {
+	id := c.Param("id")
+	sellerID, err := strconv.Atoi(id)
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	in := pb.GetSellerByIDRequest{
+		SellerId: int32(sellerID),
+	}
+
+	resp, err := h.sellerGRPC.GetSellerByID(context.Background(), &in)
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.SellerDetail{
+		ID:         int(resp.SellerId),
+		Name:       resp.Name,
+		LastActive: resp.LastActive,
+		Address: model.Address{
+			Id:      int(resp.AddressId),
+			Address: resp.AddressName,
+			Regency: resp.AddressRegency,
+			City:    resp.AddressCity,
+		},
+	})
+}
+
+func (h *SellerHandler) GetSellerByName(c echo.Context) error {
+	var input model.SellerName
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	in := pb.GetSellerByNameRequest{
+		Name: input.Name,
+	}
+
+	resp, err := h.sellerGRPC.GetSellerByName(context.Background(), &in)
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.SellerDetail{
+		ID:         int(resp.SellerId),
+		Name:       resp.Name,
+		LastActive: resp.LastActive,
+		Address: model.Address{
+			Id:      int(resp.AddressId),
+			Address: resp.AddressName,
+			Regency: resp.AddressRegency,
+			City:    resp.AddressCity,
+		},
+	})
+}
+
+func (h *SellerHandler) UpdateSellerName(c echo.Context) error {
+	id := c.Get("id").(string)
+	sellerID, _ := strconv.Atoi(id)
+
+	var input model.SellerName
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	in := pb.UpdateSellerNameRequest{
+		SellerId: int32(sellerID),
+		Name:     input.Name,
+	}
+
+	_, err := h.sellerGRPC.UpdateSellerName(context.Background(), &in)
+	if err != nil {
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "Seller name updated to " + input.Name,
 	})
 }
