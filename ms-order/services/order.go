@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"ms-order/helpers"
 	"ms-order/model"
 	orderpb "ms-order/pb"
@@ -12,7 +13,6 @@ import (
 )
 
 func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest) (*orderpb.OrderCreateResponse, error) {
-	// TODO: minus shipment
 	order := &model.Order{
 		ID: primitive.NewObjectID(),
 		User: model.User{
@@ -25,7 +25,7 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 			ID:      in.Seller.Id,
 			Name:    in.Seller.Name,
 			Address: in.Seller.Address,
-			City:    in.User.City,
+			City:    in.Seller.City,
 		},
 		Shipment: model.Shipment{
 			Company: in.Shipment.Company,
@@ -48,6 +48,38 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 		})
 	}
 
+	// get shipment price
+	origin, ok := helpers.LIST_KOTA[order.User.City]
+	if !ok {
+		return nil, ErrInvalidArgument(fmt.Errorf("origin city not valid: %v", order.User.City))
+	}
+
+	destination, ok := helpers.LIST_KOTA[order.Seller.City]
+	if !ok {
+		return nil, ErrInvalidArgument(fmt.Errorf("destination city not valid: %v", order.Seller.City))
+	}
+
+	res, err := s.client.Courier.GetPrice(origin, destination, order.Shipment.Company)
+	if err != nil {
+		return nil, ErrInternal(err, s.log)
+	}
+
+	for _, r := range res.Rajaongkir.Results {
+		if r.Code == order.Shipment.Company {
+			for _, val := range r.Costs {
+				if order.Shipment.Service == val.Service {
+					order.Shipment.Price = val.Cost[0].Value
+				}
+			}
+		}
+	}
+	if order.Shipment.Price == 0 {
+		return nil, ErrNotFound(fmt.Sprintf("shipment service not found: %v - %v", order.Shipment.Company, order.Shipment.Service))
+	}
+
+	order.Subtotal = helpers.CalculateSubtotal(order.Products)
+	order.Total = helpers.CalculateTotal(order)
+
 	invoice, err := s.client.Payment.CreateInvoice(order.ID.Hex(), order.Total, &order.Payment.Method)
 	if err != nil {
 		return nil, ErrInternal(err, s.log)
@@ -56,25 +88,6 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 	order.Payment.InvoiceURL = invoice.InvoiceUrl
 	order.Payment.Status = string(invoice.Status)
 
-	// get shipment price
-	res, err := s.client.Courier.GetPrice(
-		helpers.LIST_KOTA[order.User.City],
-		helpers.LIST_KOTA[order.Seller.City],
-		order.Shipment.Company,
-	)
-	if err != nil {
-		return nil, ErrInternal(err, s.log)
-	}
-	for _, r := range res.Rajaongkir.Results {
-		for _, val := range r.Costs {
-			if order.Shipment.Company == val.Service {
-				order.Shipment.Price = val.Cost[0].Value
-			}
-		}
-	}
-
-	order.Subtotal = helpers.CalculateSubtotal(order.Products)
-	order.Total = helpers.CalculateTotal(order)
 	// insert repo
 	err = s.repo.Order.CreateOrder(order)
 	if err != nil {
@@ -82,16 +95,19 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 	}
 
 	response := &orderpb.OrderCreateResponse{
-		Id: order.ID.Hex(),
+		Id:     order.ID.Hex(),
+		Status: order.Status,
 		User: &orderpb.OrderCreateResponse_User{
 			Id:      order.User.ID,
 			Name:    order.User.Name,
 			Address: order.User.Address,
+			City:    order.User.City,
 		},
 		Seller: &orderpb.OrderCreateResponse_Seller{
 			Id:      order.Seller.ID,
 			Name:    order.Seller.Name,
 			Address: order.Seller.Address,
+			City:    order.Seller.City,
 		},
 		Payment: &orderpb.OrderCreateResponse_Payment{
 			InvoiceId:  order.Payment.InvoiceID,
@@ -99,7 +115,11 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 			Method:     order.Payment.Method,
 			Status:     order.Payment.Status,
 		},
-		Shipment:  &orderpb.OrderCreateResponse_Shipment{},
+		Shipment: &orderpb.OrderCreateResponse_Shipment{
+			Company: order.Shipment.Company,
+			Service: order.Shipment.Service,
+			Price:   order.Shipment.Price,
+		},
 		Subtotal:  order.Subtotal,
 		Total:     order.Total,
 		CreatedAt: timestamppb.New(order.CreatedAt),
