@@ -3,6 +3,7 @@ package services
 import (
 	"ms-order/client"
 	"ms-order/config"
+	"ms-order/pb"
 	"ms-order/repository"
 
 	"go.uber.org/zap"
@@ -11,8 +12,9 @@ import (
 )
 
 type Service struct {
-	CartService
-	OrderService
+	pb.UnimplementedOrderServiceServer
+	repo   *repository.MongoRepository
+	client *client.Client
 	cfg config.Config
 	log *zap.Logger
 }
@@ -26,10 +28,10 @@ type NewServiceParam struct {
 
 func New(param NewServiceParam) *Service {
 	return &Service{
-		CartService:  CartService{repo: param.Repo, client: param.Client, log: param.Log},
-		OrderService: OrderService{repo: param.Repo, client: param.Client, log: param.Log},
-		cfg:          param.Cfg,
-		log:          param.Log,
+		repo:   param.Repo,
+		client: param.Client,
+		cfg:    param.Cfg,
+		log:    param.Log,
 	}
 }
 
