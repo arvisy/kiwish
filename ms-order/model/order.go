@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 const (
 	ORDER_STATUS_UNPAID   = "UNPAID"
@@ -10,12 +14,15 @@ const (
 )
 
 type Order struct {
-	OrderID       string    `bson:"_id,omitempty"`
-	UserID        int64     `bson:"user_id"`
-	OrderDetailID string    `bson:"order_detail_id"`
-	Status        string    `bson:"status"`
-	PaymentID     string    `bson:"payment_id"`
-	TotalPrice    float64   `bson:"total_price"`
-	CreatedAt     time.Time `bson:"created_at"`
-	UpdatedAt     time.Time `bson:"updated_at"`
+	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	User          User               `bson:"user"`
+	Seller        Seller             `bson:"seller"`
+	Payment       Payment            `bson:"payment"`
+	Shipment      Courier            `bson:"shipment"`
+	Products      []Product          `bson:"products"`
+	Subtotal      float64            `bson:"subtotal"`
+	ShipmentPrice float64            `bson:"shipment_price"`
+	Total         float64            `bson:"total"`
+	Status        string             `bson:"status"`
+	CreatedAt     time.Time          `bson:"created_at"`
 }
