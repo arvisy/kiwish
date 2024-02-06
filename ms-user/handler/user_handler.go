@@ -205,3 +205,73 @@ func (u *UserHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressReq
 		City:    address.City,
 	}, nil
 }
+
+func (u *UserHandler) GetCustomerAdmin(ctx context.Context, in *pb.GetCustomerAdminRequest) (*pb.GetCustomerAdminResponse, error) {
+	userID, err := strconv.Atoi(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := u.UserRepository.GetUserAdmin(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetCustomerAdminResponse{
+		UserId: in.UserId,
+		Name:   user.Name,
+		Email:  user.Email,
+	}, nil
+}
+
+func (u *UserHandler) GetAllCustomerAdmin(ctx context.Context, in *pb.Empty) (*pb.GetAllCustomerAdminResponse, error) {
+	users, err := u.UserRepository.GetAllCustomerAdmin()
+	if err != nil {
+		return nil, err
+	}
+
+	var customerResponses []*pb.CustomerResponse
+	for _, user := range users {
+		userID := strconv.Itoa(user.Id)
+
+		customerResponses = append(customerResponses, &pb.CustomerResponse{
+			UserId: userID,
+			Name:   user.Name,
+			Email:  user.Email,
+		})
+	}
+
+	return &pb.GetAllCustomerAdminResponse{
+		Customers: customerResponses,
+	}, nil
+}
+
+func (u *UserHandler) UpdateCustomerAdmin(ctx context.Context, in *pb.UpdateCustomerAdminRequest) (*pb.UpdateCustomerAdminResponse, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id:       strCon,
+		Name:     in.Name,
+		Email:    in.Email,
+		Password: string(hashedPassword),
+	}
+
+	err = u.UserRepository.UpdateCustomer(user.Id, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateCustomerAdminResponse{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}, nil
+}

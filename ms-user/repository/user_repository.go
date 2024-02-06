@@ -119,3 +119,54 @@ func (u *UserRepository) FindByCredentials(email, password string) (*model.User,
 
 	return &user, nil
 }
+
+func (u *UserRepository) GetUserAdmin(userID int) (*model.User, error) {
+	query := "SELECT id, name, email, password, role_id FROM users WHERE id=$1"
+	row := u.DB.QueryRow(query, userID)
+
+	var user model.User
+	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &user, nil
+}
+
+func (u *UserRepository) GetAllCustomerAdmin() ([]*model.User, error) {
+	query := "SELECT id, name, email, password, role_id FROM users"
+	rows, err := u.DB.Query(query)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*model.User
+	for rows.Next() {
+		var user model.User
+		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (u *UserRepository) UpdateCustomerAdmin(userID int, customer model.User) error {
+	query := "UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4"
+	_, err := u.DB.Exec(query, customer.Name, customer.Email, customer.Password, userID)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}

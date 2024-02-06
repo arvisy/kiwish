@@ -53,6 +53,14 @@ func main() {
 		private.POST("/user/address", u.AddAddress)
 		private.PUT("/user/address", u.UpdateAddress)
 	}
+
+	admin := e.Group("/api/admin")
+	admin.Use(middleware.Authentication, middleware.AdminAuth)
+	{
+		admin.GET("/user/:id", u.GetCustomerAdmin)
+		admin.GET("/user", u.GetAllCustomerAdmin)
+		admin.PUT("/user/:id", u.UpdateCustomerAdmin)
+	}
 	// private := e.Group("")
 	// // private.Use(middleware.Authentication)
 	// {

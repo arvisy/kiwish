@@ -17,10 +17,10 @@ service UserService {
     rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
 
     // admin
-    // rpc GetCustomer (Empty) returns (Empty);
-    // rpc GetAllCustomer (Empty) returns (Empty);
-    // rpc UpdateCustomer (Empty) returns (Empty);
-    // rpc DeleteCustomer (Empty) returns (Empty);
+    rpc GetCustomerAdmin (GetCustomerAdminRequest) returns (GetCustomerAdminResponse);
+    rpc GetAllCustomerAdmin (Empty) returns (GetAllCustomerAdminResponse);
+    rpc UpdateCustomerAdmin (UpdateCustomerAdminRequest) returns (UpdateCustomerAdminResponse);
+    rpc DeleteCustomerAdmin (DeleteCustomerAdminRequest) returns (Empty);
     
     // seller
     // rpc GetSeller (Empty) returns (Empty);
@@ -110,3 +110,41 @@ message UpdateAddressResponse {
     string regency = 2;
     string city = 3;
 }
+
+message GetCustomerAdminRequest {
+    string user_id = 1;
+}
+
+message GetCustomerAdminResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetAllCustomerAdminResponse {
+    repeated CustomerResponse customers = 1;
+}
+
+message CustomerResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message UpdateCustomerAdminRequest {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateCustomerAdminResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message DeleteCustomerAdminRequest {
+    string id = 1;
+}
+
