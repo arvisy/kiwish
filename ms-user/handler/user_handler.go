@@ -398,8 +398,10 @@ func (u *UserHandler) GetUserAddress(ctx context.Context, in *pb.GetUserAddressR
 		return nil, err
 	}
 
+	addCon := strconv.Itoa(res.Id)
+
 	resp := pb.GetUserAddressResponse{
-		AddressId: int64(res.Id),
+		AddressId: addCon,
 		Address:   res.Address,
 		Regency:   res.Regency,
 		City:      res.City,
