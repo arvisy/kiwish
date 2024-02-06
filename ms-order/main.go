@@ -37,7 +37,6 @@ func main() {
 	})
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterCartServiceServer(grpcServer, service)
 	pb.RegisterOrderServiceServer(grpcServer, service)
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.Port))

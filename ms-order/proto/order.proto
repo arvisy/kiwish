@@ -12,6 +12,7 @@ service OrderService {
   // payment
 
   // courier
+  rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
 
   // cart
   rpc CartCreate(CartCreateRequest) returns (CartCreateResponse) {}
@@ -32,6 +33,30 @@ message OrderDirectCreateRequest {
 }
 
 message OrderDirectCreateResponse {}
+
+// courier
+message AddCourierInfoRequest {
+  string company  = 1;
+  string awb  = 2;
+}
+
+message CourierResponse {
+  string awb  = 1;
+  string company  = 2;
+  string status = 3;
+  string date = 4;
+  double fee  = 5;
+  string origin = 6;
+  string destination = 7;
+  repeated HistoryResponse history = 8;
+}
+
+message HistoryResponse {
+  string date = 1;
+  string description = 2;
+}
+
+
 
 // cart
 message Cart {
