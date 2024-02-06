@@ -6,6 +6,7 @@ import (
 	"ms-gateway/helper"
 	"ms-gateway/model"
 	pb "ms-gateway/pb"
+	"regexp"
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -40,36 +41,25 @@ func (u *UserHandler) Register(c echo.Context) error {
 		})
 	}
 
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(payload.Email) {
+		return c.JSON(400, helper.Response{
+			Message: "invalid email format",
+		})
+	}
+
 	in := pb.RegisterRequest{
 		Name:     payload.Name,
 		Email:    payload.Email,
 		Password: payload.Password,
 	}
 
-	// tambahin pemilihan role customer atau seller
-	// tambahin return user role dan id di pb.RegisterResponse
 	response, err := u.userGRPC.Register(context.TODO(), &in)
 	if err != nil {
 		return c.JSON(400, helper.Response{
 			Message: "failed to register user",
 		})
 	}
-
-	// add seller
-	// if role == "3" {
-	// 	in2 := pb.AddSellerRequest{
-	// 		SellerId: id,
-	// 		Name:     response.Name,
-	// 	}
-
-	// 	_, err := u.sellerGRPC.AddSeller(context.TODO(), &in2)
-	// 	if err != nil {
-	// 		return c.JSON(500, helper.Response{
-	// 			Message: "failed to add seller",
-	// 			Detail:  err.Error(),
-	// 		})
-	// 	}
-	// }
 
 	return c.JSON(201, response)
 }
@@ -229,7 +219,6 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 		})
 	}
 
-	// add seller address
 	role := c.Get("role").(string)
 
 	if role == "3" {
@@ -283,7 +272,6 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 		})
 	}
 
-	// tambahin addressID di response utk update seller address
 	response, err := u.userGRPC.UpdateAddress(context.TODO(), &pb.UpdateAddressRequest{
 		UserId:  userID,
 		Address: updateRequest.Address,
@@ -297,26 +285,6 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 			Detail:  err.Error(),
 		})
 	}
-
-	// update seller address
-	// role := c.Get("role").(string)
-
-	// if role == "3" {
-	// 	in2 := pb.UpdateSellerAddressRequest{
-	// 		AddressId:      response.id, // todo
-	// 		AddressName:    response.Address,
-	// 		AddressRegency: response.Regency,
-	// 		AddressCity:    response.City,
-	// 	}
-
-	// 	_, err := u.sellerGRPC.UpdateAddress(context.TODO(), &in2)
-	// 	if err != nil {
-	// 		return c.JSON(500, helper.Response{
-	// 			Message: "failed to update seller address",
-	// 			Detail:  err.Error(),
-	// 		})
-	// 	}
-	// }
 
 	return c.JSON(200, helper.Response{
 		Message: "address updated successfully",

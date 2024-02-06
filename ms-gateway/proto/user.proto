@@ -28,7 +28,6 @@ service UserService {
     rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
     rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
     
-
     // rpc ReportSales (Empty) returns (Empty);
     // rpc CreateFlashSale (Empty) returns (Empty);
 }
