@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"ms-user/model"
 	pb "ms-user/pb"
@@ -24,6 +25,7 @@ func NewUserHandler(UserRepository repository.UserRepository) *UserHandler {
 func (u *UserHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -36,6 +38,7 @@ func (u *UserHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 
 	err = u.UserRepository.AddUser(user)
 	if err != nil {
+		fmt.Println(err)
 		return &pb.RegisterResponse{}, err
 	}
 
@@ -355,6 +358,7 @@ func (u *UserHandler) DeleteSellerAdmin(ctx context.Context, in *pb.DeleteSeller
 func (u *UserHandler) CreateSeller(ctx context.Context, in *pb.CreateSellerRequest) (*pb.Empty, error) {
 	strCon, err := strconv.Atoi(in.Id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -364,8 +368,44 @@ func (u *UserHandler) CreateSeller(ctx context.Context, in *pb.CreateSellerReque
 
 	err = u.UserRepository.CreateSeller(user.Id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
 	return &pb.Empty{}, nil
+}
+
+func (u *UserHandler) GetUserAddress(ctx context.Context, in *pb.GetUserAddressRequest) (*pb.GetUserAddressResponse, error) {
+	strCon, err := strconv.Atoi(in.UserId)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	addID, err := u.UserRepository.GetAddressID(strCon)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	address := model.Address{
+		Id: addID,
+	}
+
+	res, err := u.UserRepository.GetAddress(&address)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	addCon := strconv.Itoa(res.Id)
+
+	resp := pb.GetUserAddressResponse{
+		AddressId: addCon,
+		Address:   res.Address,
+		Regency:   res.Regency,
+		City:      res.City,
+	}
+
+	return &resp, nil
 }

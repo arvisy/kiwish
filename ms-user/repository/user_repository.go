@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"log"
 	"ms-user/model"
 
 	"golang.org/x/crypto/bcrypt"
@@ -40,7 +39,6 @@ func (u *UserRepository) GetAddressID(userID int) (int, error) {
 	var addressID int
 	err := u.DB.QueryRow("SELECT address_id FROM users WHERE id=$1", userID).Scan(&addressID)
 	if err != nil {
-		log.Fatal(err)
 		return 0, err
 	}
 
@@ -233,4 +231,17 @@ func (u *UserRepository) CreateSeller(customerID int) error {
 	}
 
 	return nil
+}
+
+func (u *UserRepository) GetAddress(address *model.Address) (*model.Address, error) {
+	query := "SELECT * FROM address WHERE id = $1"
+	err := u.DB.QueryRow(query, address.Id).Scan(&address.Id, &address.Address, &address.Regency, &address.City)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	return address, nil
 }
