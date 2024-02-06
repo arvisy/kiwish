@@ -29,11 +29,11 @@ func NewSellerHandler(grpc pb.SellerServiceClient) *SellerHandler {
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
 // @Param		 data body model.ProductInput true "The input payment struct"
-// @Success      201  {object}  handlers.PaymentResponse
+// @Success      201  {object}  model.Product
 // @Failure      400  {object}  helpers.message
 // @Failure      401  {object}  helpers.message
 // @Failure      500  {object}  helpers.message
-// @Router       /products/:id [Post]
+// @Router       /products [Post]
 func (h *SellerHandler) AddProduct(c echo.Context) error {
 	var input model.Product
 	if err := c.Bind(&input); err != nil {
@@ -62,8 +62,7 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"message": "Product successfully added!",
-		"task": model.Product{
+		"product": model.Product{
 			SellerID:    int(resp.SellerId),
 			Name:        resp.Name,
 			Price:       resp.Price,
@@ -74,19 +73,17 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 	})
 }
 
-// @Summary      Add Product
-// @Description  Seller can add a product
+// @Summary      Get Product By Seller ID
+// @Description  Get products by seller ID path
 // @Tags         Seller
 // @Accept       json
 // @Produce      json
-// @Param Authorization header string true "JWT Token"
-// @Param ID path int true "Booking ID"
-// @Param		 data body handlers.PaymentReq true "The input payment struct"
-// @Success      201  {object}  handlers.PaymentResponse
-// @Failure      400  {object}  handlers.ErrResponse
-// @Failure      401  {object}  handlers.ErrResponse
-// @Failure      500  {object}  handlers.ErrResponse
-// @Router       /bookings/:id [Post]
+// @Param ID path int true "Seller ID"
+// @Success      200  {object}  []model.Product
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /products/:id [Get]
 func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 	id := c.Param(":id")
 	sellerID, err := strconv.Atoi(id)
