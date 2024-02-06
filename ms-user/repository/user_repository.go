@@ -20,7 +20,7 @@ func NewUserRepository(DB *sql.DB) *UserRepository {
 func (u *UserRepository) AddUser(user model.User) error {
 	_, err := u.DB.Exec("INSERT INTO users(name, email, password, role_id) VALUES($1, $2, $3, $4)", user.Name, user.Email, user.Password, user.RoleID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
@@ -30,7 +30,7 @@ func (u *UserRepository) SetAddressCustomer(user model.User, addressID int) erro
 	query := "UPDATE users SET address_id=$1 WHERE id=$2"
 	_, err := u.DB.Exec(query, addressID, user.Id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
@@ -51,7 +51,7 @@ func (u *UserRepository) UpdateAddress(addressID int, address model.Address) err
 	query := "UPDATE address SET address=$1, regency=$2, city=$3 WHERE id=$4"
 	_, err := u.DB.Exec(query, address.Address, address.Regency, address.City, addressID)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
@@ -61,7 +61,7 @@ func (u *UserRepository) AddAddress(address model.Address) (int, error) {
 	var id int
 	err := u.DB.QueryRow("INSERT INTO address(address, regency, city) VALUES($1, $2, $3) RETURNING id", address.Address, address.Regency, address.City).Scan(&id)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	return id, nil
@@ -85,7 +85,7 @@ func (u *UserRepository) UpdateCustomer(userID int, customer model.User) error {
 	query := "UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4"
 	_, err := u.DB.Exec(query, customer.Name, customer.Email, customer.Password, userID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func (u *UserRepository) UpdateCustomer(userID int, customer model.User) error {
 func (u *UserRepository) Delete(userID int) error {
 	_, err := u.DB.Exec("DELETE FROM users WHERE id=$1", userID)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
@@ -127,7 +127,7 @@ func (u *UserRepository) GetUserAdmin(userID int) (*model.User, error) {
 	var user model.User
 	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &user, nil
@@ -137,7 +137,6 @@ func (u *UserRepository) GetAllCustomerAdmin() ([]*model.User, error) {
 	query := "SELECT id, name, email, password, role_id FROM users"
 	rows, err := u.DB.Query(query)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -147,14 +146,12 @@ func (u *UserRepository) GetAllCustomerAdmin() ([]*model.User, error) {
 		var user model.User
 		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
 		if err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		users = append(users, &user)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
@@ -165,7 +162,64 @@ func (u *UserRepository) UpdateCustomerAdmin(userID int, customer model.User) er
 	query := "UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4"
 	_, err := u.DB.Exec(query, customer.Name, customer.Email, customer.Password, userID)
 	if err != nil {
-		panic(err)
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserRepository) DeleteCustomer(userID int) error {
+	_, err := u.DB.Exec("DELETE FROM users WHERE id=$1", userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserRepository) GetSellerAdmin(sellerID int) (*model.User, error) {
+	query := "SELECT id, name, email, password, role_id FROM users WHERE id=$1 AND role_id=$2"
+	row := u.DB.QueryRow(query, sellerID, 3)
+
+	var user model.User
+	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *UserRepository) GetAllSellerAdmin() ([]*model.User, error) {
+	query := "SELECT id, name, email, password, role_id FROM users WHERE role_id=$1"
+	rows, err := u.DB.Query(query, 3)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*model.User
+	for rows.Next() {
+		var user model.User
+		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.RoleID)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (u *UserRepository) DeleteSellerAdmin(sellerID int) error {
+	query := "UPDATE users SET role_id=$1 WHERE id=$2"
+	_, err := u.DB.Exec(query, 2, sellerID)
+	if err != nil {
+		return err
 	}
 
 	return nil

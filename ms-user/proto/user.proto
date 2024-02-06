@@ -23,10 +23,9 @@ service UserService {
     rpc DeleteCustomerAdmin (DeleteCustomerAdminRequest) returns (Empty);
     
     // seller
-    // rpc GetSeller (Empty) returns (Empty);
-    // rpc GetAllSeller (Empty) returns (Empty);
-    // rpc UpdateSeller (Empty) returns (Empty);
-    // rpc DeleteSeller (Empty) returns (Empty);
+    rpc GetSellerAdmin (GetSellerAdminRequest) returns (GetSellerAdminResponse);
+    rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
+    rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
 
     // rpc ReportSales (Empty) returns (Empty);
     // rpc CreateFlashSale (Empty) returns (Empty);
@@ -145,6 +144,29 @@ message UpdateCustomerAdminResponse {
 }
 
 message DeleteCustomerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminResponse {
+    string name = 1;
+    string email = 2;
+}
+
+message GetAllSellerAdminResponse {
+    repeated SellerResponse sellers = 1;
+}
+
+message SellerResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message DeleteSellerAdminRequest {
     string id = 1;
 }
 

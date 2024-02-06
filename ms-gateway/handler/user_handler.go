@@ -322,3 +322,73 @@ func (u *UserHandler) UpdateCustomerAdmin(c echo.Context) error {
 		"user":    response,
 	})
 }
+
+func (u *UserHandler) DeleteCustomerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.DeleteCustomer(context.TODO(), &pb.DeleteCustomerRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to delete user",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "user deleted successfully",
+		"user":    response,
+	})
+}
+
+func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.GetSellerAdmin(context.TODO(), &pb.GetSellerAdminRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get seller",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) GetAllSellerAdmin(c echo.Context) error {
+	response, err := u.userGRPC.GetAllSellerAdmin(context.TODO(), &pb.Empty{})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get all seller",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.DeleteSellerAdmin(context.TODO(), &pb.DeleteSellerAdminRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to delete seller",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "seller deleted successfully",
+		"user":    response,
+	})
+}

@@ -58,8 +58,12 @@ func main() {
 	admin.Use(middleware.Authentication, middleware.AdminAuth)
 	{
 		admin.GET("/user/:id", u.GetCustomerAdmin)
+		admin.GET("/user/seller/:id", u.GetSellerAdmin)
 		admin.GET("/user", u.GetAllCustomerAdmin)
+		admin.GET("/user/seller", u.GetAllSellerAdmin)
 		admin.PUT("/user/:id", u.UpdateCustomerAdmin)
+		admin.DELETE("/user/:id", u.DeleteCustomerAdmin)
+		admin.DELETE("/user/seller/:id", u.DeleteSellerAdmin)
 	}
 	// private := e.Group("")
 	// // private.Use(middleware.Authentication)
