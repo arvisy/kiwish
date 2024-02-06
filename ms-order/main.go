@@ -11,6 +11,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -38,6 +39,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterOrderServiceServer(grpcServer, service)
+	reflection.Register(grpcServer)
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.Port))
 	if err != nil {

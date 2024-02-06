@@ -98,7 +98,7 @@ message GetUserAddressRequest {
 }
 
 message GetUserAddressResponse {
-    int64 address_id = 1;
+    string address_id = 1;
     string address = 2;
     string regency = 3;
     string city = 4;
