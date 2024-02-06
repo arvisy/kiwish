@@ -14,15 +14,14 @@ const (
 )
 
 type Order struct {
-	ID            primitive.ObjectID `bson:"_id,omitempty"`
-	User          User               `bson:"user"`
-	Seller        Seller             `bson:"seller"`
-	Payment       Payment            `bson:"payment"`
-	Shipment      Courier            `bson:"shipment"`
-	Products      []Product          `bson:"products"`
-	Subtotal      float64            `bson:"subtotal"`
-	ShipmentPrice float64            `bson:"shipment_price"`
-	Total         float64            `bson:"total"`
-	Status        string             `bson:"status"`
-	CreatedAt     time.Time          `bson:"created_at"`
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	User      User               `bson:"user"`
+	Seller    Seller             `bson:"seller"`
+	Shipment  Shipment           `bson:"shipment"`
+	Payment   Payment            `bson:"payment"`
+	Products  []Product          `bson:"products"`
+	Subtotal  float64            `bson:"subtotal"`
+	Total     float64            `bson:"total"`
+	Status    string             `bson:"status"`
+	CreatedAt time.Time          `bson:"created_at"`
 }

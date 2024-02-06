@@ -8,10 +8,10 @@ service OrderService {
   // order
   rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {}
 
-  // payment
-
   // courier
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
+  rpc GetCourierPrice(GetCourierPriceRequest)
+      returns (GetCourierPriceResponse) {}
 }
 
 // order
@@ -20,17 +20,19 @@ message OrderCreateRequest {
     int64 id = 1;
     string name = 2;
     string address = 3;
+    string city = 4;
   }
 
   message Seller {
     int64 id = 1;
     string name = 2;
     string address = 3;
+    string city = 4;
   }
 
   message Shipment {
     string company = 1;
-    double price = 2;
+    string service = 2;
   }
 
   message Product {
@@ -53,18 +55,22 @@ message OrderCreateResponse {
     int64 id = 1;
     string name = 2;
     string address = 3;
+    string city = 4;
   }
 
   message Seller {
     int64 id = 1;
     string name = 2;
     string address = 3;
+    string city = 4;
   }
 
   message Shipment {
-    string company = 1;
-    string no_resi = 2;
-    string status = 3;
+    string no_resi = 1;
+    string company = 2;
+    string service = 3;
+    string status = 4;
+    double price = 5;
   }
 
   message Product {
@@ -89,8 +95,8 @@ message OrderCreateResponse {
   Payment payment = 5;
   repeated Product products = 6;
   double subtotal = 7;
-  double shipment_price = 8;
-  double total = 9;
+  double total = 8;
+  string status = 9;
   google.protobuf.Timestamp created_at = 10;
 }
 
@@ -114,4 +120,32 @@ message CourierResponse {
 message HistoryResponse {
   string date = 1;
   string description = 2;
+}
+
+message GetCourierPriceRequest {
+  string origin = 1;
+  string destination = 2;
+  string company = 3;
+  string service = 4;
+}
+
+message GetCourierPriceResponse {
+  message Detail {
+    string city_id = 1;
+    string province_id = 2;
+    string province = 3;
+    string type = 4;
+    string city_name = 5;
+    string postal_code = 6;
+  }
+
+  message Cost {
+    string company = 1;
+    string service = 2;
+    double price = 3;
+  }
+
+  Detail origin = 1;
+  Detail destination = 2;
+  Cost cost = 3;
 }

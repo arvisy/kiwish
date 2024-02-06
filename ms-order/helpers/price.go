@@ -11,5 +11,5 @@ func CalculateSubtotal(products []model.Product) float64 {
 }
 
 func CalculateTotal(order *model.Order) float64 {
-	return order.ShipmentPrice + order.Subtotal
+	return order.Shipment.Price + order.Subtotal
 }

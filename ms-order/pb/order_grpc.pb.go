@@ -26,6 +26,7 @@ type OrderServiceClient interface {
 	OrderCreate(ctx context.Context, in *OrderCreateRequest, opts ...grpc.CallOption) (*OrderCreateResponse, error)
 	// courier
 	AddCourierInfo(ctx context.Context, in *AddCourierInfoRequest, opts ...grpc.CallOption) (*CourierResponse, error)
+	GetCourierPrice(ctx context.Context, in *GetCourierPriceRequest, opts ...grpc.CallOption) (*GetCourierPriceResponse, error)
 }
 
 type orderServiceClient struct {
@@ -54,6 +55,15 @@ func (c *orderServiceClient) AddCourierInfo(ctx context.Context, in *AddCourierI
 	return out, nil
 }
 
+func (c *orderServiceClient) GetCourierPrice(ctx context.Context, in *GetCourierPriceRequest, opts ...grpc.CallOption) (*GetCourierPriceResponse, error) {
+	out := new(GetCourierPriceResponse)
+	err := c.cc.Invoke(ctx, "/OrderService/GetCourierPrice", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
@@ -62,6 +72,7 @@ type OrderServiceServer interface {
 	OrderCreate(context.Context, *OrderCreateRequest) (*OrderCreateResponse, error)
 	// courier
 	AddCourierInfo(context.Context, *AddCourierInfoRequest) (*CourierResponse, error)
+	GetCourierPrice(context.Context, *GetCourierPriceRequest) (*GetCourierPriceResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -74,6 +85,9 @@ func (UnimplementedOrderServiceServer) OrderCreate(context.Context, *OrderCreate
 }
 func (UnimplementedOrderServiceServer) AddCourierInfo(context.Context, *AddCourierInfoRequest) (*CourierResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddCourierInfo not implemented")
+}
+func (UnimplementedOrderServiceServer) GetCourierPrice(context.Context, *GetCourierPriceRequest) (*GetCourierPriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCourierPrice not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -124,6 +138,24 @@ func _OrderService_AddCourierInfo_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_GetCourierPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCourierPriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).GetCourierPrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/OrderService/GetCourierPrice",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).GetCourierPrice(ctx, req.(*GetCourierPriceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -138,6 +170,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddCourierInfo",
 			Handler:    _OrderService_AddCourierInfo_Handler,
+		},
+		{
+			MethodName: "GetCourierPrice",
+			Handler:    _OrderService_GetCourierPrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
