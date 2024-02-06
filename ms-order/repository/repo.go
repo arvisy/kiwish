@@ -11,11 +11,11 @@ var (
 )
 
 type MongoRepository struct {
-	Cart CartRepository
+	Order OrderRepo
 }
 
 func NewMongo(db *mongo.Database) *MongoRepository {
 	return &MongoRepository{
-		Cart: CartRepository{coll: db.Collection("cart")},
+		Order: OrderRepo{coll: db.Collection("order")},
 	}
 }

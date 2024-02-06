@@ -23,11 +23,16 @@ type xenditcfg struct {
 	ApiKey string `mapstructure:"XENDIT_API_KEY"`
 }
 
+type rajaongkircfg struct {
+	ApiKey string `mapstructure:"RAJAONGKIR_API_KEY"`
+}
+
 type Config struct {
-	Port        int       `mapstructure:"PORT"`
-	Environment string    `mapstructure:"ENVIRONMENT"`
-	Db          dbcfg     `mapstructure:",squash"`
-	Xendit      xenditcfg `mapstructure:",squash"`
+	Port        int           `mapstructure:"PORT"`
+	Environment string        `mapstructure:"ENVIRONMENT"`
+	Db          dbcfg         `mapstructure:",squash"`
+	Xendit      xenditcfg     `mapstructure:",squash"`
+	RajaOngkir  rajaongkircfg `mapstructure:",squash"`
 }
 
 func New() (Config, error) {
@@ -44,6 +49,7 @@ func New() (Config, error) {
 	viper.SetDefault("DB_NAME", os.Getenv("DB_NAME"))
 
 	viper.SetDefault("XENDIT_API_KEY", os.Getenv("XENDIT_API_KEY"))
+	viper.SetDefault("RAJAONGKIR_API_KEY", os.Getenv("RAJAONGKIR_API_KEY"))
 
 	viper.AutomaticEnv()
 
