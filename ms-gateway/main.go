@@ -34,7 +34,7 @@ func main() {
 
 	routes.ApiRoutes(e, u, s)
 
-	e.Use(midd.Logger())
+	// e.Use(midd.Logger())
 	e.Use(midd.Recover())
 
 	e.Logger.Fatal(e.Start(":8080"))

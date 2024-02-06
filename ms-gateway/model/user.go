@@ -10,7 +10,7 @@ type User struct {
 }
 
 type Address struct {
-	Id      int    `json:"id"`
+	Id      int    `json:"id,omitempty"`
 	Address string `json:"address"`
 	Regency string `json:"regency"`
 	City    string `json:"city"`

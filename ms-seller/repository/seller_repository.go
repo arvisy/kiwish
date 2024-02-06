@@ -72,7 +72,7 @@ func (po *postgresRepository) ReadAllSellers() ([]*model.Seller, error) {
 }
 
 func (po *postgresRepository) ReadSellerID(sellerID int) (*model.SellerDetail, error) {
-	query := `SELECT s.id, s.name, s.last_active, a.name, a.regency, a.city 
+	query := `SELECT s.id, s.name, s.last_active, a.address, a.regency, a.city 
 			FROM sellers s
 			INNER JOIN address a ON s.address_id = a.id
 			WHERE s.id = $1;`
@@ -96,7 +96,7 @@ func (po *postgresRepository) ReadSellerID(sellerID int) (*model.SellerDetail, e
 }
 
 func (po *postgresRepository) ReadSellerName(sellerName string) (*model.SellerDetail, error) {
-	query := `SELECT s.id, s.name, s.last_active, a.name, a.regency, a.city 
+	query := `SELECT s.id, s.name, s.last_active, a.address, a.regency, a.city 
 			FROM sellers s
 			INNER JOIN address a ON s.address_id = a.id
 			WHERE s.name = $1;`
@@ -136,7 +136,7 @@ func (po *postgresRepository) UpdateAddress(input *model.Address) error {
 
 func (po *postgresRepository) UpdateName(sellerName string, sellerID int) error {
 	query := `UPDATE sellers SET 
-				name = $1,
+				name = $1
 			WHERE id = $2;
 			`
 

@@ -2,11 +2,11 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"ms-gateway/model"
 	"ms-gateway/pb"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -29,16 +29,16 @@ func NewSellerHandler(grpc pb.SellerServiceClient) *SellerHandler {
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
 // @Param		 data body model.ProductInput true "The input payment struct"
-// @Success      201  {object}  handlers.PaymentResponse
+// @Success      201  {object}  model.Product
 // @Failure      400  {object}  helpers.message
 // @Failure      401  {object}  helpers.message
 // @Failure      500  {object}  helpers.message
-// @Router       /products/:id [Post]
+// @Router       /products [Post]
 func (h *SellerHandler) AddProduct(c echo.Context) error {
 	var input model.Product
 	if err := c.Bind(&input); err != nil {
 		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
+			"message": "invalid input",
 		})
 	}
 
@@ -56,14 +56,15 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.AddProduct(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"message": "Product successfully added!",
-		"task": model.Product{
+		"product": model.Product{
+			ID:          int(resp.Productid),
 			SellerID:    int(resp.SellerId),
 			Name:        resp.Name,
 			Price:       resp.Price,
@@ -74,23 +75,23 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 	})
 }
 
-// @Summary      Add Product
-// @Description  Seller can add a product
+// @Summary      Get Product By Seller ID
+// @Description  Get products by seller ID path
 // @Tags         Seller
 // @Accept       json
 // @Produce      json
-// @Param Authorization header string true "JWT Token"
-// @Param ID path int true "Booking ID"
-// @Param		 data body handlers.PaymentReq true "The input payment struct"
-// @Success      201  {object}  handlers.PaymentResponse
-// @Failure      400  {object}  handlers.ErrResponse
-// @Failure      401  {object}  handlers.ErrResponse
-// @Failure      500  {object}  handlers.ErrResponse
-// @Router       /bookings/:id [Post]
+// @Param ID path int true "Seller ID"
+// @Success      200  {object}  []model.Product
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /products/seller/:id [Get]
 func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
-	id := c.Param(":id")
+	id := c.Param("id")
+	fmt.Println(id)
 	sellerID, err := strconv.Atoi(id)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -102,6 +103,7 @@ func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.GetProductsBySeller(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -121,14 +123,30 @@ func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 		result = append(result, &r)
 	}
 
+	if result == nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"message": "No products available",
+		})
+	}
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"products": result,
 	})
 }
 
+// @Summary      Get Product By Category
+// @Description  Get products by category ID
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param ID path string true "category name"
+// @Success      200  {object}  []model.Product
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /products/category/:category [Get]
 func (h *SellerHandler) GetProductsByCategory(c echo.Context) error {
 	category := c.Param("category")
-	category = strings.ToLower(category)
 
 	in := pb.GetProductByCategoryRequest{
 		CategoryName: category,
@@ -136,6 +154,7 @@ func (h *SellerHandler) GetProductsByCategory(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.GetProductsByCategory(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -160,6 +179,17 @@ func (h *SellerHandler) GetProductsByCategory(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Product By ID
+// @Description  Get products by product ID
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param ID path int true "Product ID"
+// @Success      200  {object}  model.Product
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /products/:id [Get]
 func (h *SellerHandler) GetProductByID(c echo.Context) error {
 	id := c.Param("id")
 	productID, err := strconv.Atoi(id)
@@ -210,8 +240,8 @@ func (h *SellerHandler) DeleteProduct(c echo.Context) error {
 
 	_, err = h.sellerGRPC.DeleteProduct(context.Background(), &in)
 	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
+		return echo.NewHTTPError(404, echo.Map{
+			"message": "product not found", // add custom err later
 		})
 	}
 
@@ -246,11 +276,12 @@ func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 		SellerId:   int32(sellerID),
 		Name:       input.Name,
 		Price:      input.Price,
+		Stock:      int32(input.Stock),
 		CategoryId: int32(input.Category_id),
 		Discount:   int32(input.Discount),
 	}
 
-	_, err = h.sellerGRPC.UpdateProduct(context.Background(), &in)
+	resp, err := h.sellerGRPC.UpdateProduct(context.Background(), &in)
 	if err != nil {
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
@@ -258,7 +289,15 @@ func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "Product successfully deleted!",
+		"product": model.Product{
+			ID:          int(resp.Productid),
+			SellerID:    int(resp.SellerId),
+			Name:        resp.Name,
+			Price:       resp.Price,
+			Stock:       int(resp.Stock),
+			Category_id: int(resp.CategoryId),
+			Discount:    int(resp.Discount),
+		},
 	})
 }
 
@@ -292,6 +331,16 @@ func (h *SellerHandler) AddSeller(c echo.Context) error {
 	})
 }
 
+// @Summary      Get All Sellers
+// @Description  Get All Sellers
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  []model.Seller
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /sellers [Get]
 func (h *SellerHandler) GetAllSellers(c echo.Context) error {
 	resp, err := h.sellerGRPC.GetAllSellers(context.Background(), &emptypb.Empty{})
 	if err != nil {
@@ -315,10 +364,22 @@ func (h *SellerHandler) GetAllSellers(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Seller By ID
+// @Description  Get Seller by ID
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param ID path int true "Seller ID"
+// @Success      200  {object}  model.SellerDetail
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /sellers/:id [Get]
 func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 	id := c.Param("id")
 	sellerID, err := strconv.Atoi(id)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -330,6 +391,7 @@ func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.GetSellerByID(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -348,6 +410,17 @@ func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Seller By Name
+// @Description  Get seller by seller Name
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param ID path string true "Seller Name"
+// @Success      200  {object}  model.SellerDetail
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /sellers/name/:name [Get]
 func (h *SellerHandler) GetSellerByName(c echo.Context) error {
 	name := c.Param("name")
 
@@ -357,6 +430,7 @@ func (h *SellerHandler) GetSellerByName(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.GetSellerByName(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -381,6 +455,7 @@ func (h *SellerHandler) UpdateSellerName(c echo.Context) error {
 
 	var input model.SellerName
 	if err := c.Bind(&input); err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
@@ -393,6 +468,7 @@ func (h *SellerHandler) UpdateSellerName(c echo.Context) error {
 
 	_, err := h.sellerGRPC.UpdateSellerName(context.Background(), &in)
 	if err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
