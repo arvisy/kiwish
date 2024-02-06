@@ -22,6 +22,18 @@ func NewSellerHandler(grpc pb.SellerServiceClient) *SellerHandler {
 	}
 }
 
+// @Summary      Add Product
+// @Description  Seller can add a product
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.ProductInput true "The input payment struct"
+// @Success      201  {object}  handlers.PaymentResponse
+// @Failure      400  {object}  helpers.message
+// @Failure      401  {object}  helpers.message
+// @Failure      500  {object}  helpers.message
+// @Router       /products/:id [Post]
 func (h *SellerHandler) AddProduct(c echo.Context) error {
 	var input model.Product
 	if err := c.Bind(&input); err != nil {
@@ -62,6 +74,19 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 	})
 }
 
+// @Summary      Add Product
+// @Description  Seller can add a product
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Booking ID"
+// @Param		 data body handlers.PaymentReq true "The input payment struct"
+// @Success      201  {object}  handlers.PaymentResponse
+// @Failure      400  {object}  handlers.ErrResponse
+// @Failure      401  {object}  handlers.ErrResponse
+// @Failure      500  {object}  handlers.ErrResponse
+// @Router       /bookings/:id [Post]
 func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 	id := c.Param(":id")
 	sellerID, err := strconv.Atoi(id)
@@ -324,15 +349,10 @@ func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 }
 
 func (h *SellerHandler) GetSellerByName(c echo.Context) error {
-	var input model.SellerName
-	if err := c.Bind(&input); err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
-		})
-	}
+	name := c.Param("name")
 
 	in := pb.GetSellerByNameRequest{
-		Name: input.Name,
+		Name: name,
 	}
 
 	resp, err := h.sellerGRPC.GetSellerByName(context.Background(), &in)
