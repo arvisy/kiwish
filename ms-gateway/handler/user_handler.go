@@ -454,3 +454,46 @@ func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
 		"user":    response,
 	})
 }
+
+func (u *UserHandler) CreateSeller(c echo.Context) error {
+	userID := c.Get("id").(string)
+
+	_, err := u.userGRPC.CreateSeller(context.TODO(), &pb.CreateSellerRequest{
+		Id: userID,
+	})
+
+	strConUser, err := strconv.Atoi(userID)
+	if err != nil {
+		return err
+	}
+
+	var payload model.SellerIDName
+	err = c.Bind(&payload)
+	if err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid payload request",
+		})
+	}
+
+	if payload.Name == "" {
+		return c.JSON(400, helper.Response{
+			Message: "name is required",
+		})
+	}
+
+	seller, err := u.sellerGRPC.AddSeller(context.TODO(), &pb.AddSellerRequest{
+		SellerId: int32(strConUser),
+		Name:     payload.Name,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to create seller",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "seller created successfully",
+		"seller":  seller,
+	})
+}

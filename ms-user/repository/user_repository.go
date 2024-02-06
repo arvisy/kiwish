@@ -224,3 +224,13 @@ func (u *UserRepository) DeleteSellerAdmin(sellerID int) error {
 
 	return nil
 }
+
+func (u *UserRepository) CreateSeller(customerID int) error {
+	query := "UPDATE users SET role_id=$1 WHERE id=$2"
+	_, err := u.DB.Exec(query, 3, customerID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

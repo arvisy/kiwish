@@ -14,10 +14,32 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 	r.POST("/login", user.Login)
 
 	// private
-	u := r.Group("/users")
-	u.Use(middleware.Authentication)
+	// u := r.Group("/users")
+	// u.Use(middleware.Authentication)
+	// {
+	// 	u.GET("", user.GetInfoCustomer)
+	// }
+
+	customer := r.Group("/api")
+	customer.Use(middleware.Authentication, middleware.CustomerAuth)
 	{
-		u.GET("", user.GetInfoCustomer)
+		customer.GET("/user", user.GetInfoCustomer)
+		customer.PUT("/user", user.UpdateCustomer)
+		customer.DELETE("/user", user.DeleteCustomer)
+		customer.POST("/user/address", user.AddAddress)
+		customer.PUT("/user/address", user.UpdateAddress)
+	}
+
+	admin := r.Group("/api/admin")
+	admin.Use(middleware.Authentication, middleware.AdminAuth)
+	{
+		admin.GET("/user/:id", user.GetCustomerAdmin)
+		admin.GET("/user/seller/:id", user.GetSellerAdmin)
+		admin.GET("/user", user.GetAllCustomerAdmin)
+		admin.GET("/user/seller", user.GetAllSellerAdmin)
+		admin.PUT("/user/:id", user.UpdateCustomerAdmin)
+		admin.DELETE("/user/:id", user.DeleteCustomerAdmin)
+		admin.DELETE("/user/seller/:id", user.DeleteSellerAdmin)
 	}
 
 	p := r.Group("/products")

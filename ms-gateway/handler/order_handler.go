@@ -1,11 +1,5 @@
 package handler
 
-import (
-	sellerpb "ms-gateway/pb"
-	orderpb "ms-order/pb"
-	userpb "ms-user/pb"
-)
-
 /*
 	payload {
 		payment_method
@@ -21,19 +15,19 @@ import (
 
 */
 
-type OrderHandler struct {
-	userGRPC   userpb.UserServiceClient
-	sellerGRPC sellerpb.SellerServiceClient
-	orderGRPC  orderpb.OrderServiceClient
-}
+// type OrderHandler struct {
+// 	userGRPC   userpb.UserServiceClient
+// 	sellerGRPC sellerpb.SellerServiceClient
+// 	orderGRPC  orderpb.OrderServiceClient
+// }
 
-func NewOrderHandler(userGRPC userpb.UserServiceClient, sellerGRPC sellerpb.SellerServiceClient, orderGRPC orderpb.OrderServiceClient) *OrderHandler {
-	return &OrderHandler{
-		userGRPC:   userGRPC,
-		sellerGRPC: sellerGRPC,
-		orderGRPC:  orderGRPC,
-	}
-}
+// func NewOrderHandler(userGRPC userpb.UserServiceClient, sellerGRPC sellerpb.SellerServiceClient, orderGRPC orderpb.OrderServiceClient) *OrderHandler {
+// 	return &OrderHandler{
+// 		userGRPC:   userGRPC,
+// 		sellerGRPC: sellerGRPC,
+// 		orderGRPC:  orderGRPC,
+// 	}
+// }
 
 // func (h OrderHandler) CreateOrderDirect(c echo.Context) error {
 // 	// validation

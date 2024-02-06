@@ -351,3 +351,21 @@ func (u *UserHandler) DeleteSellerAdmin(ctx context.Context, in *pb.DeleteSeller
 
 	return &pb.Empty{}, nil
 }
+
+func (u *UserHandler) CreateSeller(ctx context.Context, in *pb.CreateSellerRequest) (*pb.Empty, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	err = u.UserRepository.CreateSeller(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Empty{}, nil
+}
