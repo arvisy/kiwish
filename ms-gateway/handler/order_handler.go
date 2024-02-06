@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"context"
+	"ms-gateway/dto"
+	"ms-gateway/helper"
 	sellerpb "ms-gateway/pb"
 	orderpb "ms-order/pb"
 	userpb "ms-user/pb"
@@ -37,10 +40,32 @@ func NewOrderHandler(userGRPC userpb.UserServiceClient, sellerGRPC sellerpb.Sell
 	}
 }
 
-func (h OrderHandler) CreateOrderDirect(ctx echo.Context) error {
+func (h OrderHandler) CreateOrderDirect(c echo.Context) error {
 	// validation
+	var input dto.ReqCreateOrderDirect
+	if err := c.Bind(&input); err != nil {
+		return err
+	}
 
-	// sellerID := c.Get("id").(string)
-	// input.SellerID, _ = strconv.Atoi(sellerID)
+	useridstr := c.Get("id").(string)
+	rescustomer, err := h.userGRPC.GetCustomer(context.Background(), &userpb.GetCustomerRequest{
+		Id: useridstr,
+	})
+	if err != nil {
+		return err
+	}
+
+	// get address
+
+	// get product
+	resproduct, err := h.sellerGRPC.GetProductByID(context.Background(), &sellerpb.GetProductByIDRequest{
+		ProductId: input.ProductID,
+	})
+
+	// calculate total price
+	totalprice := helper.CalculatePrice(input.Quantity, resproduct.Price)
+
+	// 
+
 	return nil
 }
