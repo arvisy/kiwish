@@ -19,13 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_Register_FullMethodName       = "/user.UserService/Register"
-	UserService_Login_FullMethodName          = "/user.UserService/Login"
-	UserService_GetCustomer_FullMethodName    = "/user.UserService/GetCustomer"
-	UserService_UpdateCustomer_FullMethodName = "/user.UserService/UpdateCustomer"
-	UserService_DeleteCustomer_FullMethodName = "/user.UserService/DeleteCustomer"
-	UserService_AddAddress_FullMethodName     = "/user.UserService/AddAddress"
-	UserService_UpdateAddress_FullMethodName  = "/user.UserService/UpdateAddress"
+	UserService_Register_FullMethodName            = "/user.UserService/Register"
+	UserService_Login_FullMethodName               = "/user.UserService/Login"
+	UserService_GetCustomer_FullMethodName         = "/user.UserService/GetCustomer"
+	UserService_UpdateCustomer_FullMethodName      = "/user.UserService/UpdateCustomer"
+	UserService_DeleteCustomer_FullMethodName      = "/user.UserService/DeleteCustomer"
+	UserService_AddAddress_FullMethodName          = "/user.UserService/AddAddress"
+	UserService_UpdateAddress_FullMethodName       = "/user.UserService/UpdateAddress"
+	UserService_GetCustomerAdmin_FullMethodName    = "/user.UserService/GetCustomerAdmin"
+	UserService_GetAllCustomerAdmin_FullMethodName = "/user.UserService/GetAllCustomerAdmin"
+	UserService_UpdateCustomerAdmin_FullMethodName = "/user.UserService/UpdateCustomerAdmin"
+	UserService_DeleteCustomerAdmin_FullMethodName = "/user.UserService/DeleteCustomerAdmin"
+	UserService_GetSellerAdmin_FullMethodName      = "/user.UserService/GetSellerAdmin"
+	UserService_GetAllSellerAdmin_FullMethodName   = "/user.UserService/GetAllSellerAdmin"
+	UserService_DeleteSellerAdmin_FullMethodName   = "/user.UserService/DeleteSellerAdmin"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -41,6 +48,15 @@ type UserServiceClient interface {
 	DeleteCustomer(ctx context.Context, in *DeleteCustomerRequest, opts ...grpc.CallOption) (*Empty, error)
 	AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error)
 	UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error)
+	// admin
+	GetCustomerAdmin(ctx context.Context, in *GetCustomerAdminRequest, opts ...grpc.CallOption) (*GetCustomerAdminResponse, error)
+	GetAllCustomerAdmin(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetAllCustomerAdminResponse, error)
+	UpdateCustomerAdmin(ctx context.Context, in *UpdateCustomerAdminRequest, opts ...grpc.CallOption) (*UpdateCustomerAdminResponse, error)
+	DeleteCustomerAdmin(ctx context.Context, in *DeleteCustomerAdminRequest, opts ...grpc.CallOption) (*Empty, error)
+	// seller
+	GetSellerAdmin(ctx context.Context, in *GetSellerAdminRequest, opts ...grpc.CallOption) (*GetSellerAdminResponse, error)
+	GetAllSellerAdmin(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetAllSellerAdminResponse, error)
+	DeleteSellerAdmin(ctx context.Context, in *DeleteSellerAdminRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type userServiceClient struct {
@@ -114,6 +130,69 @@ func (c *userServiceClient) UpdateAddress(ctx context.Context, in *UpdateAddress
 	return out, nil
 }
 
+func (c *userServiceClient) GetCustomerAdmin(ctx context.Context, in *GetCustomerAdminRequest, opts ...grpc.CallOption) (*GetCustomerAdminResponse, error) {
+	out := new(GetCustomerAdminResponse)
+	err := c.cc.Invoke(ctx, UserService_GetCustomerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetAllCustomerAdmin(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetAllCustomerAdminResponse, error) {
+	out := new(GetAllCustomerAdminResponse)
+	err := c.cc.Invoke(ctx, UserService_GetAllCustomerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateCustomerAdmin(ctx context.Context, in *UpdateCustomerAdminRequest, opts ...grpc.CallOption) (*UpdateCustomerAdminResponse, error) {
+	out := new(UpdateCustomerAdminResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateCustomerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeleteCustomerAdmin(ctx context.Context, in *DeleteCustomerAdminRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, UserService_DeleteCustomerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetSellerAdmin(ctx context.Context, in *GetSellerAdminRequest, opts ...grpc.CallOption) (*GetSellerAdminResponse, error) {
+	out := new(GetSellerAdminResponse)
+	err := c.cc.Invoke(ctx, UserService_GetSellerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetAllSellerAdmin(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetAllSellerAdminResponse, error) {
+	out := new(GetAllSellerAdminResponse)
+	err := c.cc.Invoke(ctx, UserService_GetAllSellerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeleteSellerAdmin(ctx context.Context, in *DeleteSellerAdminRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, UserService_DeleteSellerAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -127,6 +206,15 @@ type UserServiceServer interface {
 	DeleteCustomer(context.Context, *DeleteCustomerRequest) (*Empty, error)
 	AddAddress(context.Context, *AddAddressRequest) (*AddAddressResponse, error)
 	UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error)
+	// admin
+	GetCustomerAdmin(context.Context, *GetCustomerAdminRequest) (*GetCustomerAdminResponse, error)
+	GetAllCustomerAdmin(context.Context, *Empty) (*GetAllCustomerAdminResponse, error)
+	UpdateCustomerAdmin(context.Context, *UpdateCustomerAdminRequest) (*UpdateCustomerAdminResponse, error)
+	DeleteCustomerAdmin(context.Context, *DeleteCustomerAdminRequest) (*Empty, error)
+	// seller
+	GetSellerAdmin(context.Context, *GetSellerAdminRequest) (*GetSellerAdminResponse, error)
+	GetAllSellerAdmin(context.Context, *Empty) (*GetAllSellerAdminResponse, error)
+	DeleteSellerAdmin(context.Context, *DeleteSellerAdminRequest) (*Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -154,6 +242,27 @@ func (UnimplementedUserServiceServer) AddAddress(context.Context, *AddAddressReq
 }
 func (UnimplementedUserServiceServer) UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAddress not implemented")
+}
+func (UnimplementedUserServiceServer) GetCustomerAdmin(context.Context, *GetCustomerAdminRequest) (*GetCustomerAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCustomerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) GetAllCustomerAdmin(context.Context, *Empty) (*GetAllCustomerAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllCustomerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateCustomerAdmin(context.Context, *UpdateCustomerAdminRequest) (*UpdateCustomerAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCustomerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteCustomerAdmin(context.Context, *DeleteCustomerAdminRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCustomerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) GetSellerAdmin(context.Context, *GetSellerAdminRequest) (*GetSellerAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSellerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) GetAllSellerAdmin(context.Context, *Empty) (*GetAllSellerAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllSellerAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteSellerAdmin(context.Context, *DeleteSellerAdminRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteSellerAdmin not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -294,6 +403,132 @@ func _UserService_UpdateAddress_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetCustomerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCustomerAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetCustomerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetCustomerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetCustomerAdmin(ctx, req.(*GetCustomerAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetAllCustomerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAllCustomerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetAllCustomerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAllCustomerAdmin(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateCustomerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCustomerAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateCustomerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateCustomerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateCustomerAdmin(ctx, req.(*UpdateCustomerAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeleteCustomerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCustomerAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteCustomerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_DeleteCustomerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteCustomerAdmin(ctx, req.(*DeleteCustomerAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetSellerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSellerAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetSellerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetSellerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetSellerAdmin(ctx, req.(*GetSellerAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetAllSellerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAllSellerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetAllSellerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAllSellerAdmin(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeleteSellerAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSellerAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteSellerAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_DeleteSellerAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteSellerAdmin(ctx, req.(*DeleteSellerAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -328,6 +563,34 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateAddress",
 			Handler:    _UserService_UpdateAddress_Handler,
+		},
+		{
+			MethodName: "GetCustomerAdmin",
+			Handler:    _UserService_GetCustomerAdmin_Handler,
+		},
+		{
+			MethodName: "GetAllCustomerAdmin",
+			Handler:    _UserService_GetAllCustomerAdmin_Handler,
+		},
+		{
+			MethodName: "UpdateCustomerAdmin",
+			Handler:    _UserService_UpdateCustomerAdmin_Handler,
+		},
+		{
+			MethodName: "DeleteCustomerAdmin",
+			Handler:    _UserService_DeleteCustomerAdmin_Handler,
+		},
+		{
+			MethodName: "GetSellerAdmin",
+			Handler:    _UserService_GetSellerAdmin_Handler,
+		},
+		{
+			MethodName: "GetAllSellerAdmin",
+			Handler:    _UserService_GetAllSellerAdmin_Handler,
+		},
+		{
+			MethodName: "DeleteSellerAdmin",
+			Handler:    _UserService_DeleteSellerAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

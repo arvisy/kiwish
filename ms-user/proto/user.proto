@@ -17,16 +17,15 @@ service UserService {
     rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
 
     // admin
-    // rpc GetCustomer (Empty) returns (Empty);
-    // rpc GetAllCustomer (Empty) returns (Empty);
-    // rpc UpdateCustomer (Empty) returns (Empty);
-    // rpc DeleteCustomer (Empty) returns (Empty);
+    rpc GetCustomerAdmin (GetCustomerAdminRequest) returns (GetCustomerAdminResponse);
+    rpc GetAllCustomerAdmin (Empty) returns (GetAllCustomerAdminResponse);
+    rpc UpdateCustomerAdmin (UpdateCustomerAdminRequest) returns (UpdateCustomerAdminResponse);
+    rpc DeleteCustomerAdmin (DeleteCustomerAdminRequest) returns (Empty);
     
     // seller
-    // rpc GetSeller (Empty) returns (Empty);
-    // rpc GetAllSeller (Empty) returns (Empty);
-    // rpc UpdateSeller (Empty) returns (Empty);
-    // rpc DeleteSeller (Empty) returns (Empty);
+    rpc GetSellerAdmin (GetSellerAdminRequest) returns (GetSellerAdminResponse);
+    rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
+    rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
 
     // rpc ReportSales (Empty) returns (Empty);
     // rpc CreateFlashSale (Empty) returns (Empty);
@@ -110,3 +109,64 @@ message UpdateAddressResponse {
     string regency = 2;
     string city = 3;
 }
+
+message GetCustomerAdminRequest {
+    string user_id = 1;
+}
+
+message GetCustomerAdminResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetAllCustomerAdminResponse {
+    repeated CustomerResponse customers = 1;
+}
+
+message CustomerResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message UpdateCustomerAdminRequest {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateCustomerAdminResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message DeleteCustomerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminResponse {
+    string name = 1;
+    string email = 2;
+}
+
+message GetAllSellerAdminResponse {
+    repeated SellerResponseAdmin sellers = 1;
+}
+
+message SellerResponseAdmin {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message DeleteSellerAdminRequest {
+    string id = 1;
+}
+

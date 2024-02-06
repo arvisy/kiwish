@@ -158,12 +158,12 @@ func (u *UserHandler) AddAddress(ctx context.Context, in *pb.AddAddressRequest) 
 
 	addressID, err := u.UserRepository.AddAddress(address)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = u.UserRepository.SetAddressCustomer(user, addressID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &pb.AddAddressResponse{
@@ -191,12 +191,12 @@ func (u *UserHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressReq
 
 	addressID, err := u.UserRepository.GetAddressID(user.Id)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	err = u.UserRepository.UpdateAddress(addressID, address)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &pb.UpdateAddressResponse{
@@ -204,4 +204,150 @@ func (u *UserHandler) UpdateAddress(ctx context.Context, in *pb.UpdateAddressReq
 		Regency: address.Regency,
 		City:    address.City,
 	}, nil
+}
+
+func (u *UserHandler) GetCustomerAdmin(ctx context.Context, in *pb.GetCustomerAdminRequest) (*pb.GetCustomerAdminResponse, error) {
+	userID, err := strconv.Atoi(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := u.UserRepository.GetUserAdmin(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetCustomerAdminResponse{
+		UserId: in.UserId,
+		Name:   user.Name,
+		Email:  user.Email,
+	}, nil
+}
+
+func (u *UserHandler) GetAllCustomerAdmin(ctx context.Context, in *pb.Empty) (*pb.GetAllCustomerAdminResponse, error) {
+	users, err := u.UserRepository.GetAllCustomerAdmin()
+	if err != nil {
+		return nil, err
+	}
+
+	var customerResponses []*pb.CustomerResponse
+	for _, user := range users {
+		userID := strconv.Itoa(user.Id)
+
+		customerResponses = append(customerResponses, &pb.CustomerResponse{
+			UserId: userID,
+			Name:   user.Name,
+			Email:  user.Email,
+		})
+	}
+
+	return &pb.GetAllCustomerAdminResponse{
+		Customers: customerResponses,
+	}, nil
+}
+
+func (u *UserHandler) UpdateCustomerAdmin(ctx context.Context, in *pb.UpdateCustomerAdminRequest) (*pb.UpdateCustomerAdminResponse, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id:       strCon,
+		Name:     in.Name,
+		Email:    in.Email,
+		Password: string(hashedPassword),
+	}
+
+	err = u.UserRepository.UpdateCustomer(user.Id, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateCustomerAdminResponse{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}, nil
+}
+
+func (u *UserHandler) DeleteCustomerAdmin(ctx context.Context, in *pb.DeleteCustomerAdminRequest) (*pb.Empty, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	err = u.UserRepository.DeleteCustomer(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Empty{}, nil
+}
+
+func (u *UserHandler) GetSellerAdmin(ctx context.Context, in *pb.GetSellerAdminRequest) (*pb.GetSellerAdminResponse, error) {
+	userID, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	seller, err := u.UserRepository.GetSellerAdmin(userID)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	return &pb.GetSellerAdminResponse{
+		Name:  seller.Name,
+		Email: seller.Email,
+	}, nil
+}
+
+func (u *UserHandler) GetAllSellerAdmin(ctx context.Context, in *pb.Empty) (*pb.GetAllSellerAdminResponse, error) {
+	users, err := u.UserRepository.GetAllSellerAdmin()
+	if err != nil {
+		return nil, err
+	}
+
+	var sellerResponses []*pb.SellerResponseAdmin
+	for _, user := range users {
+		userID := strconv.Itoa(user.Id)
+
+		sellerResponses = append(sellerResponses, &pb.SellerResponseAdmin{
+			UserId: userID,
+			Name:   user.Name,
+			Email:  user.Email,
+		})
+	}
+
+	return &pb.GetAllSellerAdminResponse{
+		Sellers: sellerResponses,
+	}, nil
+}
+
+func (u *UserHandler) DeleteSellerAdmin(ctx context.Context, in *pb.DeleteSellerAdminRequest) (*pb.Empty, error) {
+	strCon, err := strconv.Atoi(in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Id: strCon,
+	}
+
+	err = u.UserRepository.DeleteSellerAdmin(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Empty{}, nil
 }

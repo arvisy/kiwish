@@ -264,8 +264,6 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 		Id: uID,
 	}
 
-	fmt.Println("address id nya <---", user.AddressID)
-
 	if user.AddressID != 0 {
 		return c.JSON(400, helper.Response{
 			Message: "address not found",
@@ -323,5 +321,136 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 	return c.JSON(200, helper.Response{
 		Message: "address updated successfully",
 		Detail:  response,
+	})
+}
+
+func (u *UserHandler) GetCustomerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.GetCustomerAdmin(context.TODO(), &pb.GetCustomerAdminRequest{
+		UserId: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get user",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) GetAllCustomerAdmin(c echo.Context) error {
+	response, err := u.userGRPC.GetAllCustomerAdmin(context.TODO(), &pb.Empty{})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get all user",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) UpdateCustomerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	var updateRequest pb.UpdateCustomerRequest
+	if err := c.Bind(&updateRequest); err != nil {
+		return c.JSON(400, helper.Response{
+			Message: "invalid update request payload",
+		})
+	}
+
+	response, err := u.userGRPC.UpdateCustomer(context.TODO(), &pb.UpdateCustomerRequest{
+		Id:       userID,
+		Name:     updateRequest.Name,
+		Email:    updateRequest.Email,
+		Password: updateRequest.Password,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to update user",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "customer updated successfully",
+		"user":    response,
+	})
+}
+
+func (u *UserHandler) DeleteCustomerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.DeleteCustomer(context.TODO(), &pb.DeleteCustomerRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to delete user",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "user deleted successfully",
+		"user":    response,
+	})
+}
+
+func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.GetSellerAdmin(context.TODO(), &pb.GetSellerAdminRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get seller",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) GetAllSellerAdmin(c echo.Context) error {
+	response, err := u.userGRPC.GetAllSellerAdmin(context.TODO(), &pb.Empty{})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to get all seller",
+		})
+	}
+
+	return c.JSON(200, helper.Response{
+		Detail: response,
+	})
+}
+
+func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
+	userID := c.Param("id")
+
+	response, err := u.userGRPC.DeleteSellerAdmin(context.TODO(), &pb.DeleteSellerAdminRequest{
+		Id: userID,
+	})
+
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to delete seller",
+		})
+	}
+
+	return c.JSON(200, echo.Map{
+		"message": "seller deleted successfully",
+		"user":    response,
 	})
 }
