@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"ms-order/client"
-	"ms-order/pb"
 	orderpb "ms-order/pb"
 	"ms-order/repository"
 
@@ -11,7 +10,7 @@ import (
 )
 
 type OrderService struct {
-	pb.UnimplementedOrderServiceServer
+	orderpb.UnimplementedOrderServiceServer
 	repo   *repository.MongoRepository
 	client *client.Client
 	log    *zap.Logger
