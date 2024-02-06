@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+// import "google/protobuf/timestamp.proto";
+
+option go_package = "ms-order/pb";
+
+message OrderDirectCreateRequest {
+  string payment_method = 1;
+  int64 user_id = 2;
+  int64 product_id = 3;
+  int64 quantity = 4;
+  double total_price = 5;
+}
+
+message OrderDirectCreateResponse {}
+
+service OrderService {
+  rpc OrderDirectCreate(OrderDirectCreateRequest) returns (OrderDirectCreateResponse) {}
+}

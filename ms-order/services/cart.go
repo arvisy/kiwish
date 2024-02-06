@@ -3,29 +3,31 @@ package services
 import (
 	"context"
 	"errors"
-	"ms-order/exception"
+	"ms-order/client"
 	"ms-order/model"
 	"ms-order/pb"
 	"ms-order/repository"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type CartService struct {
 	pb.UnimplementedCartServiceServer
-	repo *repository.MongoRepository
-	err  *exception.ErrorHandler
+	repo   *repository.MongoRepository
+	client *client.Client
+	log    *zap.Logger
 }
 
-func NewCartService(repo *repository.MongoRepository, errh *exception.ErrorHandler) *CartService {
+func NewCartService(repo *repository.MongoRepository, client *client.Client) *CartService {
 	return &CartService{
-		repo: repo,
-		err:  errh,
+		repo:   repo,
+		client: client,
 	}
 }
 
-func (h CartService) CartCreate(ctx context.Context, in *pb.CartCreateRequest) (*pb.CartCreateResponse, error) {
+func (s CartService) CartCreate(ctx context.Context, in *pb.CartCreateRequest) (*pb.CartCreateResponse, error) {
 	cart := &model.Cart{
 		ID:        in.Cart.Id,
 		UserID:    in.Cart.UserId,
@@ -35,9 +37,9 @@ func (h CartService) CartCreate(ctx context.Context, in *pb.CartCreateRequest) (
 		UpdatedAt: in.Cart.UpdatedAt.AsTime(),
 	}
 
-	err := h.repo.Cart.Create(ctx, cart)
+	err := s.repo.Cart.Create(ctx, cart)
 	if err != nil {
-		return nil, h.err.ErrInternal(err)
+		return nil, ErrInternal(err, s.log)
 	}
 
 	return &pb.CartCreateResponse{
@@ -53,10 +55,10 @@ func (h CartService) CartCreate(ctx context.Context, in *pb.CartCreateRequest) (
 	}, nil
 }
 
-func (h CartService) CartGetAll(ctx context.Context, in *pb.CartGetAllRequest) (*pb.CartGetAllResponse, error) {
-	carts, err := h.repo.Cart.GetAll(ctx, in.UserId)
+func (s CartService) CartGetAll(ctx context.Context, in *pb.CartGetAllRequest) (*pb.CartGetAllResponse, error) {
+	carts, err := s.repo.Cart.GetAll(ctx, in.UserId)
 	if err != nil {
-		return nil, h.err.ErrInternal(err)
+		return nil,ErrInternal(err, s.log)
 	}
 
 	var response pb.CartGetAllResponse
@@ -68,14 +70,14 @@ func (h CartService) CartGetAll(ctx context.Context, in *pb.CartGetAllRequest) (
 	return &response, nil
 }
 
-func (h CartService) CartGetByID(ctx context.Context, in *pb.CartGetByIDRequest) (*pb.CartGetByIDResponse, error) {
-	cart, err := h.repo.Cart.GetByID(ctx, in.Id, in.UserId)
+func (s CartService) CartGetByID(ctx context.Context, in *pb.CartGetByIDRequest) (*pb.CartGetByIDResponse, error) {
+	cart, err := s.repo.Cart.GetByID(ctx, in.Id, in.UserId)
 	if err != nil {
 		switch {
 		case errors.Is(err, repository.ErrNotFound):
-			return nil, h.err.ErrNotFound()
+			return nil, ErrNotFound("the requested resources could not be found")
 		default:
-			return nil, h.err.ErrInternal(err)
+			return nil,ErrInternal(err, s.log)
 		}
 	}
 
@@ -91,23 +93,23 @@ func (h CartService) CartGetByID(ctx context.Context, in *pb.CartGetByIDRequest)
 	}, nil
 }
 
-func (h CartService) CartUpdate(ctx context.Context, in *pb.CartUpdateRequest) (*pb.CartUpdateResponse, error) {
-	cart, err := h.repo.Cart.GetByID(ctx, in.Id, in.UserId)
+func (s CartService) CartUpdate(ctx context.Context, in *pb.CartUpdateRequest) (*pb.CartUpdateResponse, error) {
+	cart, err := s.repo.Cart.GetByID(ctx, in.Id, in.UserId)
 	if err != nil {
 		switch {
 		case errors.Is(err, repository.ErrNotFound):
-			return nil, h.err.ErrNotFound()
+			return nil, ErrNotFound("the requested resources could not be found")
 		default:
-			return nil, h.err.ErrInternal(err)
+			return nil,ErrInternal(err, s.log)
 		}
 	}
 
 	cart.Quantity = in.Quantity
 	cart.UpdatedAt = time.Now()
 
-	err = h.repo.Cart.Update(ctx, cart)
+	err = s.repo.Cart.Update(ctx, cart)
 	if err != nil {
-		return nil, h.err.ErrInternal(err)
+		return nil,ErrInternal(err, s.log)
 	}
 
 	return &pb.CartUpdateResponse{
@@ -123,19 +125,19 @@ func (h CartService) CartUpdate(ctx context.Context, in *pb.CartUpdateRequest) (
 	}, nil
 }
 
-func (h CartService) CartDeleteOne(ctx context.Context, in *pb.CartDeleteOneRequest) (*pb.CartDeleteOneResponse, error) {
-	cart, err := h.repo.Cart.GetByID(ctx, in.Id, in.UserId)
+func (s CartService) CartDeleteOne(ctx context.Context, in *pb.CartDeleteOneRequest) (*pb.CartDeleteOneResponse, error) {
+	cart, err := s.repo.Cart.GetByID(ctx, in.Id, in.UserId)
 	if err != nil {
 		switch {
 		case errors.Is(err, repository.ErrNotFound):
-			return nil, h.err.ErrNotFound()
+			return nil, ErrNotFound("the requested resources could not be found")
 		default:
-			return nil, h.err.ErrInternal(err)
+			return nil,ErrInternal(err, s.log)
 		}
 	}
-	err = h.repo.Cart.DeleteOne(ctx, in.Id, in.UserId)
+	err = s.repo.Cart.DeleteOne(ctx, in.Id, in.UserId)
 	if err != nil {
-		return nil, h.err.ErrInternal(err)
+		return nil,ErrInternal(err, s.log)
 	}
 
 	return &pb.CartDeleteOneResponse{
@@ -151,17 +153,17 @@ func (h CartService) CartDeleteOne(ctx context.Context, in *pb.CartDeleteOneRequ
 	}, nil
 }
 
-func (h CartService) CartDeleteAll(ctx context.Context, in *pb.CartDeleteAllRequest) (*pb.CartDeleteAllResponse, error) {
-	carts, err := h.repo.Cart.GetAll(ctx, in.UserId)
+func (s CartService) CartDeleteAll(ctx context.Context, in *pb.CartDeleteAllRequest) (*pb.CartDeleteAllResponse, error) {
+	carts, err := s.repo.Cart.GetAll(ctx, in.UserId)
 	if err != nil {
-		return nil, h.err.ErrInternal(err)
+		return nil,ErrInternal(err, s.log)
 	}
 
-	err = h.repo.Cart.DeleteAll(ctx, in.UserId)
+	err = s.repo.Cart.DeleteAll(ctx, in.UserId)
 	if err != nil {
 		switch {
 		case errors.Is(err, repository.ErrNotFound):
-			return nil, h.err.ErrNotFound()
+			return nil, ErrNotFound("the requested resources could not be found")
 		default:
 			return nil, err
 		}
