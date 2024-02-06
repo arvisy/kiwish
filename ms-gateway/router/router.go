@@ -10,24 +10,18 @@ import (
 func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHandler) {
 
 	// public endpoints
-	r.POST("/register", user.Register)
-	r.POST("/login", user.Login)
-
-	// private
-	// u := r.Group("/users")
-	// u.Use(middleware.Authentication)
-	// {
-	// 	u.GET("", user.GetInfoCustomer)
-	// }
+	r.POST("/register", user.Register) // working
+	r.POST("/login", user.Login)       // working
 
 	customer := r.Group("/api")
 	customer.Use(middleware.Authentication, middleware.CustomerAuth)
 	{
-		customer.GET("/user", user.GetInfoCustomer)
-		customer.PUT("/user", user.UpdateCustomer)
-		customer.DELETE("/user", user.DeleteCustomer)
-		customer.POST("/user/address", user.AddAddress)
-		customer.PUT("/user/address", user.UpdateAddress)
+		customer.GET("/user", user.GetInfoCustomer)       // working kalo ganti jadi seller gabisa akses
+		customer.PUT("/user", user.UpdateCustomer)        // working
+		customer.DELETE("/user", user.DeleteCustomer)     // working
+		customer.POST("/user/address", user.AddAddress)   // working (perlu cek kalo user udah ada address)
+		customer.PUT("/user/address", user.UpdateAddress) // working
+		customer.POST("/user/seller", user.CreateSeller)  // working
 	}
 
 	admin := r.Group("/api/admin")
@@ -53,11 +47,15 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 	{
 		px.POST("", seller.AddProduct)
 		px.DELETE("/:id", seller.DeleteProduct)
+		px.PUT("/:id", seller.UpdateProduct)
 	}
 
-	// s := r.Group("/sellers")
-	// {
-	// 	s.POST("", seller.)
-	// }
+	s := r.Group("/sellers")
+	{
+		s.GET("", seller.GetAllSellers)
+		s.GET("/:id", seller.GetSellerByID)
+		s.GET("/name/:name", seller.GetSellerByName)
+		s.PUT("/:id", seller.UpdateSellerName)
+	}
 
 }

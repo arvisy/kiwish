@@ -26,7 +26,7 @@ func (us *postgresRepository) CreateSeller(input *model.Seller) (*model.Seller, 
 }
 
 func (us *postgresRepository) CreateAddress(input *model.Address) (*model.Address, error) {
-	query := `INSERT INTO address (name, regency, city)
+	query := `INSERT INTO address (address, regency, city)
 	VALUES ($1, $2, $3) RETURNING id;`
 
 	row := us.DB.QueryRow(query,
@@ -121,7 +121,7 @@ func (po *postgresRepository) ReadSellerName(sellerName string) (*model.SellerDe
 
 func (po *postgresRepository) UpdateAddress(input *model.Address) error {
 	query := `UPDATE address SET
-				name = $1,
+				address = $1,
 				regency = $2,
 				city = $3
 			WHERE id = $4;`

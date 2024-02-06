@@ -30,6 +30,7 @@ service SellerService {
 message AddSellerRequest {
     int32 seller_id = 1;
     string name = 2;
+    int32 address_id = 3;
 }
 
 message AddSellerAddressRequest {
