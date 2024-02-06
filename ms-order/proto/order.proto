@@ -10,6 +10,7 @@ service OrderService {
 
   // courier
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
+  rpc TrackCourierShipment(TrackCourierShipmentRequest) returns (CourierResponse) {}
   rpc GetCourierPrice(GetCourierPriceRequest)
       returns (GetCourierPriceResponse) {}
 }
@@ -104,6 +105,11 @@ message OrderCreateResponse {
 message AddCourierInfoRequest {
   string company = 1;
   string awb = 2;
+  string order_id = 3;
+}
+
+message TrackCourierShipmentRequest {
+  string order_id = 1;
 }
 
 message CourierResponse {
