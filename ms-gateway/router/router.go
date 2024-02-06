@@ -38,14 +38,14 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 
 	p := r.Group("/products")
 	{
-		p.GET("/:id", seller.GetProductByID)
-		p.GET("/category/:category", seller.GetProductsByCategory)
-		p.GET("/seller/:id", seller.GetProductsBySeller)
+		p.GET("/:id", seller.GetProductByID)                       // working
+		p.GET("/category/:category", seller.GetProductsByCategory) // working
+		p.GET("/seller/:id", seller.GetProductsBySeller)           // working
 	}
 	px := p.Group("")
 	px.Use(middleware.Authentication, middleware.SellerAuth)
 	{
-		px.POST("", seller.AddProduct)
+		px.POST("", seller.AddProduct) // working
 		px.DELETE("/:id", seller.DeleteProduct)
 		px.PUT("/:id", seller.UpdateProduct)
 	}
@@ -55,7 +55,7 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		s.GET("", seller.GetAllSellers)
 		s.GET("/:id", seller.GetSellerByID)
 		s.GET("/name/:name", seller.GetSellerByName)
-		s.PUT("/:id", seller.UpdateSellerName)
+		s.PUT("", seller.UpdateSellerName, middleware.Authentication, middleware.SellerAuth)
 	}
 
 }

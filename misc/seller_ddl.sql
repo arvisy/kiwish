@@ -16,7 +16,6 @@ CREATE TABLE "products" (
   "id" serial PRIMARY KEY,
   "seller_id" int NOT NULL,
   "name" varchar NOT NULL UNIQUE,
-  "description" text NOT NULL,
   "price" decimal NOT NULL,
   "stock" int NOT NULL,
   "category_id" int NOT NULL,
