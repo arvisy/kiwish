@@ -157,10 +157,10 @@ message GetSellerAdminResponse {
 }
 
 message GetAllSellerAdminResponse {
-    repeated SellerResponse sellers = 1;
+    repeated SellerResponseAdmin sellers = 1;
 }
 
-message SellerResponse {
+message SellerResponseAdmin {
     string user_id = 1;
     string name = 2;
     string email = 3;

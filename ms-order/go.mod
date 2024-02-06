@@ -5,8 +5,10 @@ go 1.21.4
 require (
 	github.com/elliotchance/pie/v2 v2.8.0
 	github.com/fatih/structs v1.1.0
+	github.com/golang/protobuf v1.5.3
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.18.2
+	github.com/xendit/xendit-go/v4 v4.1.0
 	go.elastic.co/ecszap v1.0.2
 	go.mongodb.org/mongo-driver v1.13.1
 	go.uber.org/zap v1.26.0
@@ -16,7 +18,6 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect

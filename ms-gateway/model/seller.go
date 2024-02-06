@@ -17,3 +17,29 @@ type ProductInput struct {
 	Category_id int     `json:"category_id"`
 	Discount    int     `json:"discount"`
 }
+
+type SellerID struct {
+	ID int `json:"id"`
+}
+
+type SellerName struct {
+	Name string `json:"name"`
+}
+
+type SellerIDName struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Seller struct {
+	ID         int    `json:"id,omitempty"`
+	Name       string `json:"name"`
+	LastActive string `json:"last_active"`
+}
+
+type SellerDetail struct {
+	ID         int     `json:"id,omitempty"`
+	Name       string  `json:"name"`
+	LastActive string  `json:"last_active"`
+	Address    Address `json:"address"`
+}

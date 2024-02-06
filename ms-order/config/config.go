@@ -19,14 +19,19 @@ type dbcfg struct {
 	MaxIdleTime string `mapstructure:"DB_MAX_IDLE_TIME"`
 }
 
-type Config struct {
-	Port        int    `mapstructure:"PORT"`
-	Environment string `mapstructure:"ENVIRONMENT"`
-	Db          dbcfg  `mapstructure:",squash"`
+type xenditcfg struct {
+	ApiKey string `mapstructure:"XENDIT_API_KEY"`
 }
 
-func New() (*Config, error) {
-	cfg := &Config{}
+type Config struct {
+	Port        int       `mapstructure:"PORT"`
+	Environment string    `mapstructure:"ENVIRONMENT"`
+	Db          dbcfg     `mapstructure:",squash"`
+	Xendit      xenditcfg `mapstructure:",squash"`
+}
+
+func New() (Config, error) {
+	cfg := Config{}
 
 	viper.SetDefault("PORT", os.Getenv("PORT"))
 	viper.SetDefault("ENVIRONMENT", "development")
@@ -38,6 +43,8 @@ func New() (*Config, error) {
 	viper.SetDefault("DB_DSN", os.Getenv("DB_DSN"))
 	viper.SetDefault("DB_NAME", os.Getenv("DB_NAME"))
 
+	viper.SetDefault("XENDIT_API_KEY", os.Getenv("XENDIT_API_KEY"))
+
 	viper.AutomaticEnv()
 
 	viper.SetConfigType("env")
@@ -45,18 +52,18 @@ func New() (*Config, error) {
 	viper.AddConfigPath(".")
 	viper.ReadInConfig()
 	if err := checkUnset(); err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	if err := viper.Unmarshal(&cfg, func(dc *mapstructure.DecoderConfig) {
 		dc.IgnoreUntaggedFields = true
 		dc.ErrorUnset = true
 	}); err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
 	if structs.HasZero(&cfg) {
-		return nil, fmt.Errorf("config type has zero value")
+		return Config{}, fmt.Errorf("config type has zero value")
 	}
 	return cfg, nil
 }

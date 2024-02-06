@@ -13,11 +13,15 @@ import (
 )
 
 type UserHandler struct {
-	userGRPC pb.UserServiceClient
+	userGRPC   pb.UserServiceClient
+	sellerGRPC pb.SellerServiceClient
 }
 
-func NewUserHandler(userGRPC pb.UserServiceClient) *UserHandler {
-	return &UserHandler{userGRPC: userGRPC}
+func NewUserHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient) *UserHandler {
+	return &UserHandler{
+		userGRPC:   userGRPC,
+		sellerGRPC: sellerGRPC,
+	}
 }
 
 func (u *UserHandler) Register(c echo.Context) error {
@@ -42,6 +46,8 @@ func (u *UserHandler) Register(c echo.Context) error {
 		Password: payload.Password,
 	}
 
+	// tambahin pemilihan role customer atau seller
+	// tambahin return user role dan id di pb.RegisterResponse
 	response, err := u.userGRPC.Register(context.TODO(), &in)
 	if err != nil {
 		return c.JSON(400, helper.Response{
@@ -49,7 +55,23 @@ func (u *UserHandler) Register(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(200, response)
+	// add seller
+	// if role == "3" {
+	// 	in2 := pb.AddSellerRequest{
+	// 		SellerId: id,
+	// 		Name:     response.Name,
+	// 	}
+
+	// 	_, err := u.sellerGRPC.AddSeller(context.TODO(), &in2)
+	// 	if err != nil {
+	// 		return c.JSON(500, helper.Response{
+	// 			Message: "failed to add seller",
+	// 			Detail:  err.Error(),
+	// 		})
+	// 	}
+	// }
+
+	return c.JSON(201, response)
 }
 
 func (u *UserHandler) Login(c echo.Context) error {
@@ -200,12 +222,31 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 	}
 
 	response, err := u.userGRPC.AddAddress(context.TODO(), &in)
-
 	if err != nil {
 		return c.JSON(500, helper.Response{
 			Message: "failed to add address",
 			Detail:  err.Error(),
 		})
+	}
+
+	// add seller address
+	role := c.Get("role").(string)
+
+	if role == "3" {
+		in2 := pb.AddSellerAddressRequest{
+			SellerId:       int32(uID),
+			AddressName:    response.Address,
+			AddressRegency: response.Regency,
+			AddressCity:    response.City,
+		}
+
+		_, err := u.sellerGRPC.AddSellerAddress(context.TODO(), &in2)
+		if err != nil {
+			return c.JSON(500, helper.Response{
+				Message: "failed to add seller address",
+				Detail:  err.Error(),
+			})
+		}
 	}
 
 	return c.JSON(201, echo.Map{
@@ -242,6 +283,7 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 		})
 	}
 
+	// tambahin addressID di response utk update seller address
 	response, err := u.userGRPC.UpdateAddress(context.TODO(), &pb.UpdateAddressRequest{
 		UserId:  userID,
 		Address: updateRequest.Address,
@@ -255,6 +297,26 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 			Detail:  err.Error(),
 		})
 	}
+
+	// update seller address
+	// role := c.Get("role").(string)
+
+	// if role == "3" {
+	// 	in2 := pb.UpdateSellerAddressRequest{
+	// 		AddressId:      response.id, // todo
+	// 		AddressName:    response.Address,
+	// 		AddressRegency: response.Regency,
+	// 		AddressCity:    response.City,
+	// 	}
+
+	// 	_, err := u.sellerGRPC.UpdateAddress(context.TODO(), &in2)
+	// 	if err != nil {
+	// 		return c.JSON(500, helper.Response{
+	// 			Message: "failed to update seller address",
+	// 			Detail:  err.Error(),
+	// 		})
+	// 	}
+	// }
 
 	return c.JSON(200, helper.Response{
 		Message: "address updated successfully",

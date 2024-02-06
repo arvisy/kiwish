@@ -318,11 +318,11 @@ func (u *UserHandler) GetAllSellerAdmin(ctx context.Context, in *pb.Empty) (*pb.
 		return nil, err
 	}
 
-	var sellerResponses []*pb.SellerResponse
+	var sellerResponses []*pb.SellerResponseAdmin
 	for _, user := range users {
 		userID := strconv.Itoa(user.Id)
 
-		sellerResponses = append(sellerResponses, &pb.SellerResponse{
+		sellerResponses = append(sellerResponses, &pb.SellerResponseAdmin{
 			UserId: userID,
 			Name:   user.Name,
 			Email:  user.Email,
