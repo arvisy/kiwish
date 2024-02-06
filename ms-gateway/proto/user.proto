@@ -14,6 +14,7 @@ service UserService {
     rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
     rpc DeleteCustomer (DeleteCustomerRequest) returns (Empty);
     rpc AddAddress (AddAddressRequest) returns (AddAddressResponse);
+    rpc GetUserAddress (GetUserAddressRequest) returns (GetUserAddressResponse);
     rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
     rpc CreateSeller (CreateSellerRequest) returns (Empty);
 
@@ -28,6 +29,7 @@ service UserService {
     rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
     rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
     
+
     // rpc ReportSales (Empty) returns (Empty);
     // rpc CreateFlashSale (Empty) returns (Empty);
 }
@@ -86,6 +88,17 @@ message DeleteCustomerRequest {
 
 message AddAddressRequest {
     string user_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message GetUserAddressRequest {
+    string user_id = 1;
+}
+
+message GetUserAddressResponse {
+    string address_id = 1;
     string address = 2;
     string regency = 3;
     string city = 4;

@@ -181,11 +181,12 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 
 	uID, _ := strconv.Atoi(userID)
 
-	user := model.User{
-		Id: uID,
+	getadd := pb.GetUserAddressRequest{
+		UserId: userID,
 	}
 
-	if user.AddressID != 0 {
+	_, err := u.userGRPC.GetUserAddress(context.TODO(), &getadd)
+	if err == nil {
 		return c.JSON(400, helper.Response{
 			Message: "address already exist",
 		})
@@ -284,6 +285,39 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 			Message: "failed to update address",
 			Detail:  err.Error(),
 		})
+	}
+
+	// update seller address
+	role := c.Get("role").(string)
+
+	if role == "3" {
+		getadd := pb.GetUserAddressRequest{
+			UserId: userID,
+		}
+
+		address, err := u.userGRPC.GetUserAddress(context.TODO(), &getadd)
+		if err != nil {
+			return c.JSON(500, helper.Response{
+				Message: "please add address before creating seller",
+			})
+		}
+
+		addressCon, _ := strconv.Atoi(address.AddressId)
+
+		in2 := pb.UpdateSellerAddressRequest{
+			AddressId:      int32(addressCon), // todo
+			AddressName:    response.Address,
+			AddressRegency: response.Regency,
+			AddressCity:    response.City,
+		}
+
+		_, err = u.sellerGRPC.UpdateAddress(context.TODO(), &in2)
+		if err != nil {
+			return c.JSON(500, helper.Response{
+				Message: "failed to update seller address",
+				Detail:  err.Error(),
+			})
+		}
 	}
 
 	return c.JSON(200, helper.Response{
@@ -426,18 +460,43 @@ func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
 func (u *UserHandler) CreateSeller(c echo.Context) error {
 	userID := c.Get("id").(string)
 
-	_, err := u.userGRPC.CreateSeller(context.TODO(), &pb.CreateSellerRequest{
-		Id: userID,
-	})
+	fmt.Println(userID)
 
 	strConUser, err := strconv.Atoi(userID)
 	if err != nil {
+		fmt.Println(err)
 		return err
+	}
+
+	getadd := pb.GetUserAddressRequest{
+		UserId: userID,
+	}
+
+	address, err := u.userGRPC.GetUserAddress(context.TODO(), &getadd)
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "please add address before creating seller",
+		})
+	}
+
+	addselladd := pb.AddSellerAddressRequest{
+		SellerId:       int32(strConUser),
+		AddressName:    address.Address,
+		AddressRegency: address.Regency,
+		AddressCity:    address.City,
+	}
+
+	addressSeller, err := u.sellerGRPC.AddSellerAddress(context.TODO(), &addselladd)
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed " + err.Error(),
+		})
 	}
 
 	var payload model.SellerIDName
 	err = c.Bind(&payload)
 	if err != nil {
+		fmt.Println(err)
 		return c.JSON(400, helper.Response{
 			Message: "invalid payload request",
 		})
@@ -450,13 +509,24 @@ func (u *UserHandler) CreateSeller(c echo.Context) error {
 	}
 
 	seller, err := u.sellerGRPC.AddSeller(context.TODO(), &pb.AddSellerRequest{
-		SellerId: int32(strConUser),
-		Name:     payload.Name,
+		SellerId:  int32(strConUser),
+		Name:      payload.Name,
+		AddressId: addressSeller.AddressId,
 	})
 
 	if err != nil {
+		fmt.Println(err)
 		return c.JSON(500, helper.Response{
 			Message: "failed to create seller",
+		})
+	}
+
+	_, err = u.userGRPC.CreateSeller(context.TODO(), &pb.CreateSellerRequest{
+		Id: userID,
+	})
+	if err != nil {
+		return c.JSON(500, helper.Response{
+			Message: "failed to change role",
 		})
 	}
 

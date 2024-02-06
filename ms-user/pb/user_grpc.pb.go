@@ -25,6 +25,7 @@ const (
 	UserService_UpdateCustomer_FullMethodName      = "/user.UserService/UpdateCustomer"
 	UserService_DeleteCustomer_FullMethodName      = "/user.UserService/DeleteCustomer"
 	UserService_AddAddress_FullMethodName          = "/user.UserService/AddAddress"
+	UserService_GetUserAddress_FullMethodName      = "/user.UserService/GetUserAddress"
 	UserService_UpdateAddress_FullMethodName       = "/user.UserService/UpdateAddress"
 	UserService_CreateSeller_FullMethodName        = "/user.UserService/CreateSeller"
 	UserService_GetCustomerAdmin_FullMethodName    = "/user.UserService/GetCustomerAdmin"
@@ -48,6 +49,7 @@ type UserServiceClient interface {
 	UpdateCustomer(ctx context.Context, in *UpdateCustomerRequest, opts ...grpc.CallOption) (*UpdateCustomerResponse, error)
 	DeleteCustomer(ctx context.Context, in *DeleteCustomerRequest, opts ...grpc.CallOption) (*Empty, error)
 	AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error)
+	GetUserAddress(ctx context.Context, in *GetUserAddressRequest, opts ...grpc.CallOption) (*GetUserAddressResponse, error)
 	UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error)
 	CreateSeller(ctx context.Context, in *CreateSellerRequest, opts ...grpc.CallOption) (*Empty, error)
 	// admin
@@ -117,6 +119,15 @@ func (c *userServiceClient) DeleteCustomer(ctx context.Context, in *DeleteCustom
 func (c *userServiceClient) AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error) {
 	out := new(AddAddressResponse)
 	err := c.cc.Invoke(ctx, UserService_AddAddress_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserAddress(ctx context.Context, in *GetUserAddressRequest, opts ...grpc.CallOption) (*GetUserAddressResponse, error) {
+	out := new(GetUserAddressResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserAddress_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -216,6 +227,7 @@ type UserServiceServer interface {
 	UpdateCustomer(context.Context, *UpdateCustomerRequest) (*UpdateCustomerResponse, error)
 	DeleteCustomer(context.Context, *DeleteCustomerRequest) (*Empty, error)
 	AddAddress(context.Context, *AddAddressRequest) (*AddAddressResponse, error)
+	GetUserAddress(context.Context, *GetUserAddressRequest) (*GetUserAddressResponse, error)
 	UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error)
 	CreateSeller(context.Context, *CreateSellerRequest) (*Empty, error)
 	// admin
@@ -251,6 +263,9 @@ func (UnimplementedUserServiceServer) DeleteCustomer(context.Context, *DeleteCus
 }
 func (UnimplementedUserServiceServer) AddAddress(context.Context, *AddAddressRequest) (*AddAddressResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddAddress not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserAddress(context.Context, *GetUserAddressRequest) (*GetUserAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserAddress not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateAddress(context.Context, *UpdateAddressRequest) (*UpdateAddressResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateAddress not implemented")
@@ -396,6 +411,24 @@ func _UserService_AddAddress_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).AddAddress(ctx, req.(*AddAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUserAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserAddress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserAddress(ctx, req.(*GetUserAddressRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -592,6 +625,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddAddress",
 			Handler:    _UserService_AddAddress_Handler,
+		},
+		{
+			MethodName: "GetUserAddress",
+			Handler:    _UserService_GetUserAddress_Handler,
 		},
 		{
 			MethodName: "UpdateAddress",

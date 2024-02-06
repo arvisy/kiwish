@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"ms-seller/model"
 	"ms-seller/pb"
 	"ms-seller/repository"
@@ -160,14 +161,17 @@ func (se *SellerService) UpdateProduct(ctx context.Context, in *pb.UpdateProduct
 
 // seller service
 func (se *SellerService) AddSeller(ctx context.Context, in *pb.AddSellerRequest) (*pb.SellerResponse, error) {
+
 	var sellerInput = model.Seller{
 		ID:         int(in.SellerId), // same as user id
 		Name:       in.Name,
-		LastActive: "",
+		LastActive: time.Now().Format("2006-01-01"),
+		AddressID:  int(in.AddressId),
 	}
 
 	seller, err := se.SellerRepository.CreateSeller(&sellerInput)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -180,7 +184,7 @@ func (se *SellerService) AddSeller(ctx context.Context, in *pb.AddSellerRequest)
 	return response, nil
 }
 
-func (se *SellerService) AddAddress(ctx context.Context, in *pb.AddSellerAddressRequest) (*pb.AddressResponse, error) {
+func (se *SellerService) AddSellerAddress(ctx context.Context, in *pb.AddSellerAddressRequest) (*pb.AddressResponse, error) {
 	var addressInput = model.Address{
 		Name:    in.AddressName,
 		Regency: in.AddressRegency,
@@ -192,11 +196,11 @@ func (se *SellerService) AddAddress(ctx context.Context, in *pb.AddSellerAddress
 		return nil, err
 	}
 
-	// update seller
-	err = se.SellerRepository.UpdateAddressID(address.ID, int(in.SellerId))
-	if err != nil {
-		return nil, err
-	}
+	// // update seller
+	// err = se.SellerRepository.UpdateAddressID(address.ID, int(in.SellerId))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	var response = &pb.AddressResponse{
 		AddressId:      int32(address.ID),
