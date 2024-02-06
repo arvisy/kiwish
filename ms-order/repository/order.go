@@ -4,6 +4,8 @@ import (
 	"context"
 	"ms-order/model"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -17,4 +19,35 @@ func (r OrderRepo) CreateOrder(order *model.Order) error {
 		return err
 	}
 	return nil
+}
+
+func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
+	filter := bson.D{primitive.E{Key: "_id", Value: orderID}}
+
+	var result model.Order
+
+	//Passing the bson.D{{}} as the filter matches  documents in the collection
+	err := r.coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, error) {
+	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
+
+	update := bson.M{ // update resi status
+		"$set": bson.M{
+			"Shipment": order.Shipment,
+		}}
+
+	// Passing the bson.D{{}} as the filter matches  documents in the collection
+	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
 }
