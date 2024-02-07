@@ -137,3 +137,117 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 
 	return response, nil
 }
+
+func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGetAllForCustomerRequest) (*orderpb.OrderGetAllForCustomerResponse, error) {
+	orders, err := s.repo.Order.GetAllForCustomer(in.Userid)
+	if err != nil {
+		return nil, err
+	}
+
+	var response = &orderpb.OrderGetAllForCustomerResponse{}
+	for idx, order := range orders {
+		response.Orders = append(response.Orders, &orderpb.OrderGetAllForCustomerResponse_Orders{
+			Id:     order.ID.Hex(),
+			Status: order.Status,
+			User: &orderpb.OrderGetAllForCustomerResponse_Orders_User{
+				Id:      order.User.ID,
+				Name:    order.User.Name,
+				Address: order.User.Address,
+				City:    order.User.City,
+			},
+			Seller: &orderpb.OrderGetAllForCustomerResponse_Orders_Seller{
+				Id:      order.Seller.ID,
+				Name:    order.Seller.Name,
+				Address: order.Seller.Address,
+				City:    order.Seller.City,
+			},
+			Payment: &orderpb.OrderGetAllForCustomerResponse_Orders_Payment{
+				InvoiceId:  order.Payment.InvoiceID,
+				InvoiceUrl: order.Payment.InvoiceURL,
+				Method:     order.Payment.Method,
+				Status:     order.Payment.Status,
+			},
+			Shipment: &orderpb.OrderGetAllForCustomerResponse_Orders_Shipment{
+				Company: order.Shipment.Company,
+				Service: order.Shipment.Service,
+				Price:   order.Shipment.Price,
+				NoResi:  order.Shipment.NoResi,
+				Status:  order.Shipment.Status,
+			},
+			Subtotal:  order.Subtotal,
+			Total:     order.Total,
+			CreatedAt: timestamppb.New(order.CreatedAt),
+		})
+
+		for _, p := range order.Products {
+			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForCustomerResponse_Orders_Product{
+				Id:          int64(p.ID),
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+				Quantity:    p.Quantity,
+			})
+		}
+	}
+
+	return response, nil
+}
+
+func (s Service) OrderGetAllForSeller(ctx context.Context, in *orderpb.OrderGetAllForSellerRequest) (*orderpb.OrderGetAllForSellerResponse, error) {
+	orders, err := s.repo.Order.GetAllForCustomer(in.Sellerid)
+	if err != nil {
+		return nil, err
+	}
+
+	var response = &orderpb.OrderGetAllForSellerResponse{}
+	for idx, order := range orders {
+		response.Orders = append(response.Orders, &orderpb.OrderGetAllForSellerResponse_Orders{
+			Id:     order.ID.Hex(),
+			Status: order.Status,
+			User: &orderpb.OrderGetAllForSellerResponse_Orders_User{
+				Id:      order.User.ID,
+				Name:    order.User.Name,
+				Address: order.User.Address,
+				City:    order.User.City,
+			},
+			Seller: &orderpb.OrderGetAllForSellerResponse_Orders_Seller{
+				Id:      order.Seller.ID,
+				Name:    order.Seller.Name,
+				Address: order.Seller.Address,
+				City:    order.Seller.City,
+			},
+			Payment: &orderpb.OrderGetAllForSellerResponse_Orders_Payment{
+				InvoiceId:  order.Payment.InvoiceID,
+				InvoiceUrl: order.Payment.InvoiceURL,
+				Method:     order.Payment.Method,
+				Status:     order.Payment.Status,
+			},
+			Shipment: &orderpb.OrderGetAllForSellerResponse_Orders_Shipment{
+				Company: order.Shipment.Company,
+				Service: order.Shipment.Service,
+				Price:   order.Shipment.Price,
+				NoResi:  order.Shipment.NoResi,
+				Status:  order.Shipment.Status,
+			},
+			Subtotal:  order.Subtotal,
+			Total:     order.Total,
+			CreatedAt: timestamppb.New(order.CreatedAt),
+		})
+
+		for _, p := range order.Products {
+			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForSellerResponse_Orders_Product{
+				Id:          int64(p.ID),
+				Name:        p.Name,
+				Description: p.Description,
+				Price:       p.Price,
+				Quantity:    p.Quantity,
+			})
+		}
+	}
+
+	return response, nil
+}
+
+func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest) (*orderpb.OrderUpdateResponse, error) {
+	return &orderpb.OrderUpdateResponse{}, nil
+}

@@ -1,7 +1,14 @@
 package dto
 
 type ReqCreateOrderDirect struct {
-	ProductID     int32  `json:"product_id"`
+	Products []struct {
+		ProductID int `json:"product_id"`
+		Quantity  int `json:"quantity"`
+	} `json:"products"`
+
+	
+
+	Shipment struct {
+	} `json:"shipment"`
 	PaymentMethod string `json:"payment_method"`
-	Quantity      int64  `json:"quantity"`
 }
