@@ -144,7 +144,7 @@ func (u *UserHandler) Login(c echo.Context) error {
 // @Failure      401  {object}  helper.Message
 // @Failure      404  {object}  helper.Message
 // @Failure      500  {object}  helper.Message
-// @Router       /api/user [Put]
+// @Router       /api/user [Get]
 func (u *UserHandler) GetInfoCustomer(c echo.Context) error {
 	userID := c.Get("id").(string)
 

@@ -285,6 +285,7 @@ message AddCourierInfoRequest {
   string company = 1;
   string awb = 2;
   string order_id = 3;
+  string seller_id = 4;
 }
 
 message TrackCourierShipmentRequest { string order_id = 1; }

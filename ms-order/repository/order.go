@@ -77,7 +77,6 @@ func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, e
 			"Shipment": order.Shipment,
 		}}
 
-	// Passing the bson.D{{}} as the filter matches  documents in the collection
 	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return nil, err

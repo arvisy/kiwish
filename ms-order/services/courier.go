@@ -2,16 +2,22 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"ms-order/helpers"
 	"ms-order/model"
 	"ms-order/pb"
+	"strconv"
 	"strings"
 )
 
 func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
-	order, err := s.repo.Order.GetOrder(in.OrderId) // tmbhin
+	order, err := s.repo.Order.GetOrder(in.OrderId)
 	if err != nil {
 		return nil, err
+	}
+
+	if strconv.Itoa(int(order.Seller.ID)) != in.SellerId {
+		return nil, fmt.Errorf("order id invalid")
 	}
 
 	// company = jne, pos, jnt_cargo,sicepat, tiki, anteraja, ninja, lion
@@ -31,20 +37,36 @@ func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoReque
 
 	order.Shipment = inputShipment
 
-	_, err = s.repo.Order.UpdateShipmentResiStatus(order) // belom selesai
+	_, err = s.repo.Order.UpdateShipmentResiStatus(order)
 	if err != nil {
 		return nil, err
 	}
 
+	var list []*pb.HistoryResponse
+
+	for _, v := range info.Data.History {
+		u := pb.HistoryResponse{
+			Date:        v.Date,
+			Description: v.Description,
+		}
+		list = append(list, &u)
+	}
+
 	resp := pb.CourierResponse{
-		// nanti ganti
+		Awb:         info.Data.Summary.AWB,
+		Company:     info.Data.Summary.Courier,
+		Status:      info.Data.Summary.Status,
+		Date:        info.Data.Summary.Date,
+		Origin:      info.Data.Detail.Origin,
+		Destination: info.Data.Detail.Destination,
+		History:     list,
 	}
 
 	return &resp, nil
 }
 
 func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierShipmentRequest) (*pb.CourierResponse, error) {
-	order, err := s.repo.Order.GetOrder(in.OrderId) // tmbhin
+	order, err := s.repo.Order.GetOrder(in.OrderId)
 	if err != nil {
 		return nil, err
 	}
