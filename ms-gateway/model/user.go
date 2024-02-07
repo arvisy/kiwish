@@ -10,7 +10,7 @@ type User struct {
 }
 
 type Address struct {
-	Id      int    `json:"id"`
+	Id      int    `json:"id,omitempty"`
 	Address string `json:"address"`
 	Regency string `json:"regency"`
 	City    string `json:"city"`
@@ -19,4 +19,20 @@ type Address struct {
 type Role struct {
 	Id   int    `json:"id"`
 	Name string `json:"role"`
+}
+
+// response for swagger
+type RegisterResponse struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
 }

@@ -4,48 +4,298 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "ms-order/pb";
 
-
 service OrderService {
   // order
-  rpc OrderDirectCreate(OrderDirectCreateRequest) returns (OrderDirectCreateResponse) {}
-
-  // payment
+  rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {}
+  rpc OrderUpdate(OrderUpdateRequest) returns (OrderUpdateResponse) {}
+  rpc OrderGetAllForCustomer(OrderGetAllForCustomerRequest)
+      returns (OrderGetAllForCustomerResponse) {}
+  rpc OrderGetAllForSeller(OrderGetAllForSellerRequest)
+      returns (OrderGetAllForSellerResponse) {}
 
   // courier
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
-
-  // cart
-  rpc CartCreate(CartCreateRequest) returns (CartCreateResponse) {}
-  rpc CartGetByID(CartGetByIDRequest) returns (CartGetByIDResponse) {}
-  rpc CartGetAll(CartGetAllRequest) returns (CartGetAllResponse) {}
-  rpc CartUpdate(CartUpdateRequest) returns (CartUpdateResponse) {}
-  rpc CartDeleteOne(CartDeleteOneRequest) returns (CartDeleteOneResponse) {}
-  rpc CartDeleteAll(CartDeleteAllRequest) returns (CartDeleteAllResponse) {}
+  rpc TrackCourierShipment(TrackCourierShipmentRequest)
+      returns (CourierResponse) {}
+  rpc GetCourierPrice(GetCourierPriceRequest)
+      returns (GetCourierPriceResponse) {}
 }
 
 // order
-message OrderDirectCreateRequest {
-  string payment_method = 1;
-  int64 user_id = 2;
-  int64 product_id = 3;
-  int64 quantity = 4;
-  double total_price = 5;
+message OrderCreateRequest {
+  message User {
+    int64 id = 1;
+    string name = 2;
+    string address = 3;
+    string city = 4;
+  }
+
+  message Seller {
+    int64 id = 1;
+    string name = 2;
+    string address = 3;
+    string city = 4;
+  }
+
+  message Shipment {
+    string company = 1;
+    string service = 2;
+  }
+
+  message Product {
+    int64 id = 1;
+    string name = 2;
+    double price = 4;
+    int64 quantity = 5;
+  }
+
+  User user = 1;
+  Seller seller = 2;
+  Shipment shipment = 5;
+  repeated Product products = 3;
+  string payment_method = 4;
 }
 
-message OrderDirectCreateResponse {}
+message OrderCreateResponse {
+  message User {
+    int64 id = 1;
+    string name = 2;
+    string address = 3;
+    string city = 4;
+  }
+
+  message Seller {
+    int64 id = 1;
+    string name = 2;
+    string address = 3;
+    string city = 4;
+  }
+
+  message Shipment {
+    string no_resi = 1;
+    string company = 2;
+    string service = 3;
+    string status = 4;
+    double price = 5;
+  }
+
+  message Product {
+    int64 id = 1;
+    string name = 2;
+    double price = 4;
+    int64 quantity = 6;
+  }
+
+  message Payment {
+    string invoice_id = 1;
+    string invoice_url = 2;
+    string method = 3;
+    string status = 4;
+  }
+
+  string id = 1;
+  User user = 2;
+  Seller seller = 3;
+  Shipment shipment = 4;
+  Payment payment = 5;
+  repeated Product products = 6;
+  double subtotal = 7;
+  double total = 8;
+  string status = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message OrderGetAllForCustomerRequest {
+  int64 userid = 1;
+  string status = 2; // optional
+}
+
+message OrderGetAllForCustomerResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+
+  repeated Orders orders = 1;
+}
+
+message OrderGetAllForSellerRequest {
+  int64 sellerid = 1;
+  string status = 2; // optional
+}
+
+message OrderGetAllForSellerResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+
+  repeated Orders orders = 1;
+}
+
+message OrderUpdateRequest {
+  string id = 1;
+  string order_status = 2;
+  string payment_status = 3;
+  string shipment_resi = 4;
+  string shipment_status = 5;
+}
+
+message OrderUpdateResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+  Orders orders = 1;
+}
 
 // courier
 message AddCourierInfoRequest {
-  string company  = 1;
-  string awb  = 2;
+  string company = 1;
+  string awb = 2;
+  string order_id = 3;
 }
 
+message TrackCourierShipmentRequest { string order_id = 1; }
+
 message CourierResponse {
-  string awb  = 1;
-  string company  = 2;
+  string awb = 1;
+  string company = 2;
   string status = 3;
   string date = 4;
-  double fee  = 5;
+  double fee = 5;
   string origin = 6;
   string destination = 7;
   repeated HistoryResponse history = 8;
@@ -56,54 +306,30 @@ message HistoryResponse {
   string description = 2;
 }
 
-
-
-// cart
-message Cart {
-  string id = 1;
-  int64 user_id = 2;
-  int64 product_id = 3;
-  double quantity = 4;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
+message GetCourierPriceRequest {
+  string origin = 1;
+  string destination = 2;
+  string company = 3;
+  string service = 4;
 }
 
-message CartCreateRequest { Cart cart = 1; }
-message CartCreateResponse {
-  Cart cart = 1;
-  string message = 2;
-}
+message GetCourierPriceResponse {
+  message Detail {
+    string city_id = 1;
+    string province_id = 2;
+    string province = 3;
+    string type = 4;
+    string city_name = 5;
+    string postal_code = 6;
+  }
 
-message CartGetByIDRequest {
-  string id = 1;
-  int64 user_id = 2;
-}
-message CartGetByIDResponse { Cart cart = 1; }
+  message Cost {
+    string company = 1;
+    string service = 2;
+    double price = 3;
+  }
 
-message CartGetAllRequest { int64 user_id = 1; }
-message CartGetAllResponse { repeated Cart carts = 1; }
-
-message CartUpdateRequest {
-  string id = 1;
-  int64 user_id = 2;
-  double quantity = 4;
-}
-message CartUpdateResponse {
-  Cart cart = 1;
-  string message = 2;
-}
-
-message CartDeleteOneRequest {
-  string id = 1;
-  int64 user_id = 2;
-}
-message CartDeleteOneResponse {
-  Cart cart = 1;
-  string message = 2;
-}
-
-message CartDeleteAllRequest { int64 user_id = 1; }
-message CartDeleteAllResponse {
-  repeated string ids = 1;
-  string message = 2;
+  Detail origin = 1;
+  Detail destination = 2;
+  Cost cost = 3;
 }

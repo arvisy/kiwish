@@ -35,6 +35,7 @@ func main() {
 		log.Println(err)
 	}
 
+	log.Println("gRPC [ms-seller] started on :50002")
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		log.Println(err)

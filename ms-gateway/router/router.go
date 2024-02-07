@@ -3,11 +3,12 @@ package routes
 import (
 	"ms-gateway/handler"
 	"ms-gateway/middleware"
+	"ms-gateway/pb"
 
 	"github.com/labstack/echo/v4"
 )
 
-func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHandler) {
+func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHandler, order *handler.OrderHandler, userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) {
 
 	// public endpoints
 	r.POST("/register", user.Register) // working
@@ -19,7 +20,7 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		customer.GET("/user", user.GetInfoCustomer)       // working kalo ganti jadi seller gabisa akses
 		customer.PUT("/user", user.UpdateCustomer)        // working
 		customer.DELETE("/user", user.DeleteCustomer)     // working
-		customer.POST("/user/address", user.AddAddress)   // working (perlu cek kalo user udah ada address)
+		customer.POST("/user/address", user.AddAddress)   // working
 		customer.PUT("/user/address", user.UpdateAddress) // working
 		customer.POST("/user/seller", user.CreateSeller)  // working
 	}
@@ -38,14 +39,14 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 
 	p := r.Group("/products")
 	{
-		p.GET("/:id", seller.GetProductByID)
-		p.GET("/category/:category", seller.GetProductsByCategory)
-		p.GET("/seller/:id", seller.GetProductsBySeller)
+		p.GET("/:id", seller.GetProductByID)                       // working
+		p.GET("/category/:category", seller.GetProductsByCategory) // working
+		p.GET("/seller/:id", seller.GetProductsBySeller)           // working
 	}
 	px := p.Group("")
 	px.Use(middleware.Authentication, middleware.SellerAuth)
 	{
-		px.POST("", seller.AddProduct)
+		px.POST("", seller.AddProduct) // working
 		px.DELETE("/:id", seller.DeleteProduct)
 		px.PUT("/:id", seller.UpdateProduct)
 	}
@@ -55,7 +56,15 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		s.GET("", seller.GetAllSellers)
 		s.GET("/:id", seller.GetSellerByID)
 		s.GET("/name/:name", seller.GetSellerByName)
-		s.PUT("/:id", seller.UpdateSellerName)
+		s.PUT("", seller.UpdateSellerName, middleware.Authentication, middleware.SellerAuth)
+	}
+
+	o := r.Group("/order")
+	o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC))
+	{
+		o.POST("", order.CreateOrder)
+		o.GET("/customer", order.GetAllOrderForCustomer, middleware.CustomerAuth)
+		o.GET("/seller", order.GetAllOrderForSeller, middleware.SellerAuth)
 	}
 
 }

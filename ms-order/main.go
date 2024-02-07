@@ -11,6 +11,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -27,6 +28,9 @@ func main() {
 
 	repo := repository.NewMongo(db)
 	client, close, err := client.New(cfg)
+	if err != nil {
+		log.Fatal("failed initialize client", zap.Error(err))
+	}
 	defer close()
 
 	service := services.New(services.NewServiceParam{
@@ -38,6 +42,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterOrderServiceServer(grpcServer, service)
+	reflection.Register(grpcServer)
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.Port))
 	if err != nil {

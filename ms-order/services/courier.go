@@ -1,28 +1,100 @@
 package services
 
-// func (o *OrderService) AddCourierInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
-// 	// get resi
+import (
+	"context"
+	"ms-order/helpers"
+	"ms-order/model"
+	"ms-order/pb"
+	"strings"
+)
 
-// 	info, err := helpers.TrackPackage(in.Awb, strings.ToLower(in.Company))
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
+	order, err := s.repo.Order.GetOrder(in.OrderId)
+	if err != nil {
+		return nil, err
+	}
 
-// 	input := model.Courier{
-// 		AWB:         info.Data.Summary.AWB,
-// 		Company:     info.Data.Summary.Courier,
-// 		Status:      info.Data.Summary.Status,
-// 		Date:        info.Data.Summary.Date,
-// 		Fee:         info.Data.Summary.Amount,
-// 		Origin:      info.Data.Detail.Origin,
-// 		Destination: info.Data.Detail.Destination,
-// 		History:     info.Data.History,
-// 	}
+	// if strconv.Itoa(int(order.Seller.ID)) != in.SellerId {
+	// 	return nil, fmt.Errorf("order id invalid")
+	// }
 
-// 	res, err := o.repo.AddCourierInfo(&input)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	// company = jne, pos, jnt_cargo,sicepat, tiki, anteraja, ninja, lion
+	// jet, dll
+	info, err := helpers.TrackPackage(in.Awb, strings.ToLower(in.Company))
+	if err != nil {
+		return nil, err
+	}
 
-// 	return response, nil
-// }
+	inputShipment := model.Shipment{
+		NoResi:  info.Data.Summary.AWB,
+		Company: order.Shipment.Company,
+		Service: order.Shipment.Service,
+		Status:  info.Data.Summary.Status,
+		Price:   order.Shipment.Price,
+	}
+
+	order.Shipment = inputShipment
+
+	_, err = s.repo.Order.UpdateShipmentResiStatus(order)
+	if err != nil {
+		return nil, err
+	}
+
+	var list []*pb.HistoryResponse
+
+	for _, v := range info.Data.History {
+		u := pb.HistoryResponse{
+			Date:        v.Date,
+			Description: v.Description,
+		}
+		list = append(list, &u)
+	}
+
+	resp := pb.CourierResponse{
+		Awb:         info.Data.Summary.AWB,
+		Company:     info.Data.Summary.Courier,
+		Status:      info.Data.Summary.Status,
+		Date:        info.Data.Summary.Date,
+		Origin:      info.Data.Detail.Origin,
+		Destination: info.Data.Detail.Destination,
+		History:     list,
+	}
+
+	return &resp, nil
+}
+
+func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierShipmentRequest) (*pb.CourierResponse, error) {
+	order, err := s.repo.Order.GetOrder(in.OrderId)
+	if err != nil {
+		return nil, err
+	}
+
+	// company = jne, pos, jnt_cargo,sicepat, tiki, anteraja, ninja, lion
+	// jet, dll
+	info, err := helpers.TrackPackage(order.Shipment.NoResi, strings.ToLower(order.Shipment.Company))
+	if err != nil {
+		return nil, err
+	}
+
+	var list []*pb.HistoryResponse
+
+	for _, v := range info.Data.History {
+		u := pb.HistoryResponse{
+			Date:        v.Date,
+			Description: v.Description,
+		}
+		list = append(list, &u)
+	}
+
+	resp := pb.CourierResponse{
+		Awb:         info.Data.Summary.AWB,
+		Company:     info.Data.Summary.Courier,
+		Status:      info.Data.Summary.Status,
+		Date:        info.Data.Summary.Date,
+		Origin:      info.Data.Detail.Origin,
+		Destination: info.Data.Detail.Destination,
+		History:     list,
+	}
+
+	return &resp, nil
+}
