@@ -212,62 +212,62 @@ func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-// /orders/:id [put]
-func (h OrderHandler) AddCourierinfo(c echo.Context) error {
-	sellerID := c.Get("id").(string)
+// // /orders/:id [put]
+// func (h OrderHandler) AddCourierinfo(c echo.Context) error {
+// 	sellerID := c.Get("id").(string)
 
-	orderID := c.Param("id")
-	_, err := strconv.Atoi(orderID) // check if param is not a digit
-	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input",
-		})
-	}
+// 	orderID := c.Param("id")
+// 	_, err := strconv.Atoi(orderID) // check if param is not a digit
+// 	if err != nil {
+// 		return echo.NewHTTPError(400, echo.Map{
+// 			"message": "invalid input",
+// 		})
+// 	}
 
-	var input model.CourierRequest
-	if err := c.Bind(&input); err != nil {
-		fmt.Println(err)
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
-		})
-	}
+// 	var input model.CourierRequest
+// 	if err := c.Bind(&input); err != nil {
+// 		fmt.Println(err)
+// 		return echo.NewHTTPError(400, echo.Map{
+// 			"message": "invalid input", // add custom err later
+// 		})
+// 	}
 
-	in := pb.AddCourierInfoRequest{
-		Awb:      input.NoResi,
-		Company:  input.Company,
-		OrderId:  orderID,
-		SellerId: sellerID,
-	}
+// 	in := pb.AddCourierInfoRequest{
+// 		Awb:      input.NoResi,
+// 		Company:  input.Company,
+// 		OrderId:  orderID,
+// 		SellerId: sellerID,
+// 	}
 
-	resp, err := h.orderGRPC.AddCourierInfo(context.TODO(), &in)
-	if err != nil {
-		return echo.NewHTTPError(500, echo.Map{
-			"message": err.Error(),
-		})
-	}
+// 	resp, err := h.orderGRPC.AddCourierInfo(context.TODO(), &in)
+// 	if err != nil {
+// 		return echo.NewHTTPError(500, echo.Map{
+// 			"message": err.Error(),
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, resp)
-}
+// 	return c.JSON(http.StatusOK, resp)
+// }
 
-func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
-	orderID := c.Param("id")
-	_, err := strconv.Atoi(orderID) // check if param is not a digit
-	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input",
-		})
-	}
+// func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
+// 	orderID := c.Param("id")
+// 	_, err := strconv.Atoi(orderID) // check if param is not a digit
+// 	if err != nil {
+// 		return echo.NewHTTPError(400, echo.Map{
+// 			"message": "invalid input",
+// 		})
+// 	}
 
-	in := pb.TrackCourierShipmentRequest{
-		OrderId: orderID,
-	}
+// 	in := pb.TrackCourierShipmentRequest{
+// 		OrderId: orderID,
+// 	}
 
-	resp, err := h.orderGRPC.TrackCourierShipment(context.TODO(), &in)
-	if err != nil {
-		return echo.NewHTTPError(500, echo.Map{
-			"message": err.Error(),
-		})
-	}
+// 	resp, err := h.orderGRPC.TrackCourierShipment(context.TODO(), &in)
+// 	if err != nil {
+// 		return echo.NewHTTPError(500, echo.Map{
+// 			"message": err.Error(),
+// 		})
+// 	}
 
-	return c.JSON(http.StatusOK, resp)
-}
+// 	return c.JSON(http.StatusOK, resp)
+// }
