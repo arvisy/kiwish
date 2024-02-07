@@ -2,10 +2,13 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"ms-gateway/dto"
+	"ms-gateway/helper"
 	"ms-gateway/pb"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -36,17 +39,43 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 		Id: c.Get("id").(string),
 	})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error get user entity")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	useraddr, err := h.userGRPC.GetUserAddress(context.Background(), &pb.GetUserAddressRequest{
 		UserId: c.Get("id").(string),
 	})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error get user address")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	product, err := h.sellerGRPC.GetProductByID()
+	seller, err := h.sellerGRPC.GetSellerByID(context.Background(), &pb.GetSellerByIDRequest{
+		SellerId: int32(input.SellerID),
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var productsreq []*pb.OrderCreateRequest_Product
+	for _, input := range input.Products {
+		res, err := h.sellerGRPC.GetProductByID(context.Background(), &pb.GetProductByIDRequest{
+			ProductId: int32(input.ProductID),
+		})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		if res.Stock < int32(input.Quantity) {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("out of stock for product id %v ", res.Productid))
+		}
+
+		productsreq = append(productsreq, &pb.OrderCreateRequest_Product{
+			Id:       int64(res.Productid),
+			Name:     res.Name,
+			Price:    float64(res.Price),
+			Quantity: int64(input.Quantity),
+		})
+	}
 
 	req := pb.OrderCreateRequest{
 		User: &pb.OrderCreateRequest_User{
@@ -56,9 +85,68 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 			City:    useraddr.City,
 		},
 		Seller: &pb.OrderCreateRequest_Seller{
-			// Id: ,
+			Id:      int64(seller.SellerId),
+			Name:    seller.Name,
+			Address: seller.AddressName,
+			City:    seller.AddressCity,
 		},
+		Products: productsreq,
+		Shipment: &pb.OrderCreateRequest_Shipment{
+			Company: input.Shipment.Company,
+			Service: input.Shipment.Service,
+		},
+		PaymentMethod: input.PaymentMethod,
 	}
 
-	return nil
+	order, err := h.orderGRPC.OrderCreate(context.Background(), &req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"order":   order,
+		"message": "order created",
+	})
+}
+
+func (h OrderHandler) GetAllOrderForCustomer(c echo.Context) error {
+	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	paramstatus := strings.ToUpper(c.QueryParam("status"))
+
+	if paramstatus != "" && !helper.ValidOrderStatus(paramstatus) {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid status query param")
+	}
+
+	res, err := h.orderGRPC.OrderGetAllForCustomer(context.Background(), &pb.OrderGetAllForCustomerRequest{
+		Userid: userid,
+		Status: paramstatus,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"orders": res.Orders,
+	})
+}
+
+func (h OrderHandler) GetAllOrderForSeller(c echo.Context) error {
+	sellerid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	paramstatus := strings.ToUpper(c.QueryParam("status"))
+
+	if paramstatus != "" && !helper.ValidOrderStatus(paramstatus) {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid status query param")
+	}
+
+	res, err := h.orderGRPC.OrderGetAllForSeller(context.Background(), &pb.OrderGetAllForSellerRequest{
+		Sellerid: sellerid,
+		Status:   paramstatus,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"orders": res.Orders,
+	})
 }

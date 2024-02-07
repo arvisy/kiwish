@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"ms-order/helpers"
 	"ms-order/model"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -40,11 +42,10 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 	}
 	for _, p := range in.Products {
 		order.Products = append(order.Products, model.Product{
-			ID:          int(p.Id),
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-			Quantity:    p.Quantity,
+			ID:       int(p.Id),
+			Name:     p.Name,
+			Price:    p.Price,
+			Quantity: p.Quantity,
 		})
 	}
 
@@ -127,11 +128,10 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 
 	for _, p := range order.Products {
 		response.Products = append(response.Products, &orderpb.OrderCreateResponse_Product{
-			Id:          int64(p.ID),
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-			Quantity:    p.Quantity,
+			Id:       int64(p.ID),
+			Name:     p.Name,
+			Price:    p.Price,
+			Quantity: p.Quantity,
 		})
 	}
 
@@ -139,7 +139,7 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 }
 
 func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGetAllForCustomerRequest) (*orderpb.OrderGetAllForCustomerResponse, error) {
-	orders, err := s.repo.Order.GetAllForCustomer(in.Userid)
+	orders, err := s.repo.Order.GetAllForCustomer(in.Userid, in.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +181,10 @@ func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGe
 
 		for _, p := range order.Products {
 			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForCustomerResponse_Orders_Product{
-				Id:          int64(p.ID),
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
-				Quantity:    p.Quantity,
+				Id:       int64(p.ID),
+				Name:     p.Name,
+				Price:    p.Price,
+				Quantity: p.Quantity,
 			})
 		}
 	}
@@ -194,7 +193,7 @@ func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGe
 }
 
 func (s Service) OrderGetAllForSeller(ctx context.Context, in *orderpb.OrderGetAllForSellerRequest) (*orderpb.OrderGetAllForSellerResponse, error) {
-	orders, err := s.repo.Order.GetAllForCustomer(in.Sellerid)
+	orders, err := s.repo.Order.GetAllForCustomer(in.Sellerid, in.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -236,11 +235,10 @@ func (s Service) OrderGetAllForSeller(ctx context.Context, in *orderpb.OrderGetA
 
 		for _, p := range order.Products {
 			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForSellerResponse_Orders_Product{
-				Id:          int64(p.ID),
-				Name:        p.Name,
-				Description: p.Description,
-				Price:       p.Price,
-				Quantity:    p.Quantity,
+				Id:       int64(p.ID),
+				Name:     p.Name,
+				Price:    p.Price,
+				Quantity: p.Quantity,
 			})
 		}
 	}
@@ -249,5 +247,80 @@ func (s Service) OrderGetAllForSeller(ctx context.Context, in *orderpb.OrderGetA
 }
 
 func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest) (*orderpb.OrderUpdateResponse, error) {
-	return &orderpb.OrderUpdateResponse{}, nil
+	order, err := s.repo.Order.GetByID(in.Id)
+	if err != nil {
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return nil, ErrNotFound("order not found")
+		default:
+			return nil, ErrInternal(err, s.log)
+		}
+	}
+
+	if in.OrderStatus != "" {
+		order.Status = in.OrderStatus
+	}
+
+	if in.PaymentStatus != "" {
+		order.Payment.Status = in.PaymentStatus
+	}
+
+	if in.ShipmentResi != "" {
+		order.Shipment.NoResi = in.ShipmentResi
+	}
+
+	if in.ShipmentStatus != "" {
+		order.Shipment.Status = in.ShipmentStatus
+	}
+
+	err = s.repo.Order.Update(order)
+	if err != nil {
+		return nil, ErrInternal(err, s.log)
+	}
+
+	var response = &orderpb.OrderUpdateResponse{
+		Orders: &orderpb.OrderUpdateResponse_Orders{
+			Id: order.ID.Hex(),
+			User: &orderpb.OrderUpdateResponse_Orders_User{
+				Id:      order.User.ID,
+				Name:    order.User.Name,
+				Address: order.User.Address,
+				City:    order.User.City,
+			},
+			Seller: &orderpb.OrderUpdateResponse_Orders_Seller{
+				Id:      order.Seller.ID,
+				Name:    order.Seller.Name,
+				Address: order.Seller.Address,
+				City:    order.Seller.City,
+			},
+			Shipment: &orderpb.OrderUpdateResponse_Orders_Shipment{
+				NoResi:  order.Shipment.NoResi,
+				Company: order.Shipment.Company,
+				Service: order.Shipment.Service,
+				Status:  order.Shipment.Status,
+				Price:   order.Shipment.Price,
+			},
+			Payment: &orderpb.OrderUpdateResponse_Orders_Payment{
+				InvoiceId:  order.Payment.InvoiceID,
+				InvoiceUrl: order.Payment.InvoiceURL,
+				Method:     order.Payment.Method,
+				Status:     order.Payment.Status,
+			},
+			Subtotal:  order.Subtotal,
+			Total:     order.Total,
+			Status:    order.Status,
+			CreatedAt: timestamppb.New(order.CreatedAt),
+		},
+	}
+
+	for _, p := range order.Products {
+		response.Orders.Products = append(response.Orders.Products, &orderpb.OrderUpdateResponse_Orders_Product{
+			Id:       int64(p.ID),
+			Name:     p.Name,
+			Price:    p.Price,
+			Quantity: p.Quantity,
+		})
+	}
+
+	return response, nil
 }

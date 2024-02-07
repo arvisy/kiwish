@@ -35,8 +35,30 @@ func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
 	return &result, nil
 }
 
-func (r OrderRepo) GetAllForCustomer(userid int64) ([]model.Order, error) {
-	filter := bson.D{{Key: "user._id", Value: userid}}
+func (r OrderRepo) GetByID(orderid string) (*model.Order, error) {
+	oid, err := primitive.ObjectIDFromHex(orderid)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+
+	var result model.Order
+	err = r.coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (r OrderRepo) GetAllForCustomer(userid int64, status string) ([]model.Order, error) {
+	var filter primitive.D
+	if status == "" {
+		filter = bson.D{{Key: "user._id", Value: userid}}
+	} else {
+		filter = bson.D{{Key: "user._id", Value: userid}, {Key: "status", Value: status}}
+	}
 
 	var result = []model.Order{}
 	cursor, err := r.coll.Find(context.Background(), filter)
@@ -52,8 +74,13 @@ func (r OrderRepo) GetAllForCustomer(userid int64) ([]model.Order, error) {
 	return result, nil
 }
 
-func (r OrderRepo) GetAllForSeller(sellerid int64) ([]model.Order, error) {
-	filter := bson.D{{Key: "seller._id", Value: sellerid}}
+func (r OrderRepo) GetAllForSeller(sellerid int64, status string) ([]model.Order, error) {
+	var filter primitive.D
+	if status == "" {
+		filter = bson.D{{Key: "seller._id", Value: sellerid}}
+	} else {
+		filter = bson.D{{Key: "seller._id", Value: sellerid}, {Key: "status", Value: status}}
+	}
 
 	var result = []model.Order{}
 	cursor, err := r.coll.Find(context.Background(), filter)
@@ -67,6 +94,22 @@ func (r OrderRepo) GetAllForSeller(sellerid int64) ([]model.Order, error) {
 	}
 
 	return result, nil
+}
+
+func (r OrderRepo) Update(order *model.Order) error {
+	filter := bson.D{{Key: "_id", Value: order.ID}}
+	update := bson.M{
+		"$set": bson.M{
+			"status":           order.Status,
+			"payment.status":   order.Payment.Status,
+			"shipment.status":  order.Shipment.Status,
+			"shipment.no_resi": order.Shipment.NoResi,
+		}}
+	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, error) {

@@ -24,15 +24,23 @@ func main() {
 	}
 	defer sellerConn.Close()
 
+	orderConn, err := grpc.Dial(":50003", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sellerConn.Close()
+
 	userService := pb.NewUserServiceClient(userConn)
 	sellerService := pb.NewSellerServiceClient(sellerConn)
+	orderService := pb.NewOrderServiceClient(orderConn)
 
 	u := handler.NewUserHandler(userService, sellerService)
 	s := handler.NewSellerHandler(sellerService)
+	o := handler.NewOrderHandler(userService, sellerService, orderService)
 
 	e := echo.New()
 
-	routes.ApiRoutes(e, u, s)
+	routes.ApiRoutes(e, u, s, o, userService, sellerService, orderService)
 
 	// e.Use(midd.Logger())
 	e.Use(midd.Recover())
