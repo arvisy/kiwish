@@ -57,6 +57,8 @@ func main() {
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	// e.Use(midd.Logger())
 	e.Use(midd.Recover())
 
