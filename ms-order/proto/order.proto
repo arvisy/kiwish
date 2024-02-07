@@ -7,10 +7,16 @@ option go_package = "ms-order/pb";
 service OrderService {
   // order
   rpc OrderCreate(OrderCreateRequest) returns (OrderCreateResponse) {}
+  rpc OrderUpdate(OrderUpdateRequest) returns (OrderUpdateResponse) {}
+  rpc OrderGetAllForCustomer(OrderGetAllForCustomerRequest)
+      returns (OrderGetAllForCustomerResponse) {}
+  rpc OrderGetAllForSeller(OrderGetAllForSellerRequest)
+      returns (OrderGetAllForSellerResponse) {}
 
   // courier
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
-  rpc TrackCourierShipment(TrackCourierShipmentRequest) returns (CourierResponse) {}
+  rpc TrackCourierShipment(TrackCourierShipmentRequest)
+      returns (CourierResponse) {}
   rpc GetCourierPrice(GetCourierPriceRequest)
       returns (GetCourierPriceResponse) {}
 }
@@ -101,6 +107,179 @@ message OrderCreateResponse {
   google.protobuf.Timestamp created_at = 10;
 }
 
+message OrderGetAllForCustomerRequest { int64 userid = 1; }
+
+message OrderGetAllForCustomerResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      string description = 3;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+
+  repeated Orders orders = 1;
+}
+
+message OrderGetAllForSellerRequest { int64 sellerid = 1; }
+
+message OrderGetAllForSellerResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      string description = 3;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+
+  repeated Orders orders = 1;
+}
+
+message OrderUpdateRequest {
+  string id = 1;
+  string order_status = 2;
+  string payment_status = 3;
+  string shipment_resi = 4;
+  string shipment_status = 5;
+}
+
+message OrderUpdateResponse {
+  message Orders {
+    message User {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Seller {
+      int64 id = 1;
+      string name = 2;
+      string address = 3;
+      string city = 4;
+    }
+
+    message Shipment {
+      string no_resi = 1;
+      string company = 2;
+      string service = 3;
+      string status = 4;
+      double price = 5;
+    }
+
+    message Product {
+      int64 id = 1;
+      string name = 2;
+      string description = 3;
+      double price = 4;
+      int64 quantity = 6;
+    }
+
+    message Payment {
+      string invoice_id = 1;
+      string invoice_url = 2;
+      string method = 3;
+      string status = 4;
+    }
+
+    string id = 1;
+    User user = 2;
+    Seller seller = 3;
+    Shipment shipment = 4;
+    Payment payment = 5;
+    repeated Product products = 6;
+    double subtotal = 7;
+    double total = 8;
+    string status = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+  Orders orders = 1;
+}
+
 // courier
 message AddCourierInfoRequest {
   string company = 1;
@@ -108,9 +287,7 @@ message AddCourierInfoRequest {
   string order_id = 3;
 }
 
-message TrackCourierShipmentRequest {
-  string order_id = 1;
-}
+message TrackCourierShipmentRequest { string order_id = 1; }
 
 message CourierResponse {
   string awb = 1;

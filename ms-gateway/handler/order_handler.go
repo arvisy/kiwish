@@ -1,60 +1,64 @@
 package handler
 
-/*
-	payload {
-		payment_method
-		product_id
-		// kurir
+import (
+	"context"
+	"ms-gateway/dto"
+	"ms-gateway/pb"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+)
+
+type OrderHandler struct {
+	userGRPC   pb.UserServiceClient
+	sellerGRPC pb.SellerServiceClient
+	orderGRPC  pb.OrderServiceClient
+}
+
+func NewOrderHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) *OrderHandler {
+	return &OrderHandler{
+		userGRPC:   userGRPC,
+		sellerGRPC: sellerGRPC,
+		orderGRPC:  orderGRPC,
+	}
+}
+
+func (h OrderHandler) CreateOrder(c echo.Context) error {
+	var input dto.ReqCreateOrderDirect
+	if err := c.Bind(&input); err != nil {
+		return err
 	}
 
-	func order direct
-		// validation
-		// get login user
-		// fetch produk with seller
-		//
+	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
 
-*/
+	user, err := h.userGRPC.GetCustomer(context.Background(), &pb.GetCustomerRequest{
+		Id: c.Get("id").(string),
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "error get user entity")
+	}
 
-// type OrderHandler struct {
-// 	userGRPC   userpb.UserServiceClient
-// 	sellerGRPC sellerpb.SellerServiceClient
-// 	orderGRPC  orderpb.OrderServiceClient
-// }
+	useraddr, err := h.userGRPC.GetUserAddress(context.Background(), &pb.GetUserAddressRequest{
+		UserId: c.Get("id").(string),
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "error get user address")
+	}
 
-// func NewOrderHandler(userGRPC userpb.UserServiceClient, sellerGRPC sellerpb.SellerServiceClient, orderGRPC orderpb.OrderServiceClient) *OrderHandler {
-// 	return &OrderHandler{
-// 		userGRPC:   userGRPC,
-// 		sellerGRPC: sellerGRPC,
-// 		orderGRPC:  orderGRPC,
-// 	}
-// }
+	product, err := h.sellerGRPC.GetProductByID()
 
-// func (h OrderHandler) CreateOrderDirect(c echo.Context) error {
-// 	// validation
-// 	var input dto.ReqCreateOrderDirect
-// 	if err := c.Bind(&input); err != nil {
-// 		return err
-// 	}
+	req := pb.OrderCreateRequest{
+		User: &pb.OrderCreateRequest_User{
+			Id:      userid,
+			Name:    user.Name,
+			Address: useraddr.Address,
+			City:    useraddr.City,
+		},
+		Seller: &pb.OrderCreateRequest_Seller{
+			// Id: ,
+		},
+	}
 
-// 	useridstr := c.Get("id").(string)
-// 	rescustomer, err := h.userGRPC.GetCustomer(context.Background(), &userpb.GetCustomerRequest{
-// 		Id: useridstr,
-// 	})
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// get address
-
-// 	// get product
-// 	resproduct, err := h.sellerGRPC.GetProductByID(context.Background(), &sellerpb.GetProductByIDRequest{
-// 		ProductId: input.ProductID,
-// 	})
-
-// 	// calculate total price
-// 	totalprice := helper.CalculatePrice(input.Quantity, resproduct.Price)
-
-// 	//
-
-// 	return nil
-// }
+	return nil
+}

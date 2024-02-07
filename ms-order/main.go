@@ -28,6 +28,9 @@ func main() {
 
 	repo := repository.NewMongo(db)
 	client, close, err := client.New(cfg)
+	if err != nil {
+		log.Fatal("failed initialize client", zap.Error(err))
+	}
 	defer close()
 
 	service := services.New(services.NewServiceParam{

@@ -35,6 +35,40 @@ func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
 	return &result, nil
 }
 
+func (r OrderRepo) GetAllForCustomer(userid int64) ([]model.Order, error) {
+	filter := bson.D{{Key: "user._id", Value: userid}}
+
+	var result = []model.Order{}
+	cursor, err := r.coll.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cursor.All(context.Background(), &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (r OrderRepo) GetAllForSeller(sellerid int64) ([]model.Order, error) {
+	filter := bson.D{{Key: "seller._id", Value: sellerid}}
+
+	var result = []model.Order{}
+	cursor, err := r.coll.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cursor.All(context.Background(), &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, error) {
 	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
 

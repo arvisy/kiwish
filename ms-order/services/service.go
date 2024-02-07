@@ -15,8 +15,8 @@ type Service struct {
 	pb.UnimplementedOrderServiceServer
 	repo   *repository.MongoRepository
 	client *client.Client
-	cfg config.Config
-	log *zap.Logger
+	cfg    config.Config
+	log    *zap.Logger
 }
 
 type NewServiceParam struct {
@@ -27,11 +27,13 @@ type NewServiceParam struct {
 }
 
 func New(param NewServiceParam) *Service {
+	log := param.Log.WithOptions(zap.AddCallerSkip(1))
+
 	return &Service{
 		repo:   param.Repo,
 		client: param.Client,
 		cfg:    param.Cfg,
-		log:    param.Log,
+		log:    log,
 	}
 }
 
