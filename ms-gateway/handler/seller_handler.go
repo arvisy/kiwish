@@ -28,11 +28,11 @@ func NewSellerHandler(grpc pb.SellerServiceClient) *SellerHandler {
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
-// @Param		 data body model.ProductInput true "The input payment struct"
+// @Param		 data body model.ProductInput true "The input product struct"
 // @Success      201  {object}  model.Product
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /products [Post]
 func (h *SellerHandler) AddProduct(c echo.Context) error {
 	var input model.Product
@@ -82,9 +82,9 @@ func (h *SellerHandler) AddProduct(c echo.Context) error {
 // @Produce      json
 // @Param ID path int true "Seller ID"
 // @Success      200  {object}  []model.Product
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /products/seller/:id [Get]
 func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 	id := c.Param("id")
@@ -141,9 +141,9 @@ func (h *SellerHandler) GetProductsBySeller(c echo.Context) error {
 // @Produce      json
 // @Param ID path string true "category name"
 // @Success      200  {object}  []model.Product
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /products/category/:category [Get]
 func (h *SellerHandler) GetProductsByCategory(c echo.Context) error {
 	category := c.Param("category")
@@ -179,48 +179,19 @@ func (h *SellerHandler) GetProductsByCategory(c echo.Context) error {
 	})
 }
 
-// @Summary      Get Product By ID
-// @Description  Get products by product ID
+// @Summary      Delete Product
+// @Description  Seller can delete a product
 // @Tags         Seller
 // @Accept       json
 // @Produce      json
+// @Param Authorization header string true "JWT Token"
 // @Param ID path int true "Product ID"
-// @Success      200  {object}  model.Product
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
-// @Router       /products/:id [Get]
-func (h *SellerHandler) GetProductByID(c echo.Context) error {
-	id := c.Param("id")
-	productID, err := strconv.Atoi(id)
-	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
-		})
-	}
-
-	in := pb.GetProductByIDRequest{
-		ProductId: int32(productID),
-	}
-
-	resp, err := h.sellerGRPC.GetProductByID(context.Background(), &in)
-	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
-		})
-	}
-
-	return c.JSON(http.StatusOK, model.Product{
-		ID:          int(resp.Productid),
-		SellerID:    int(resp.SellerId),
-		Name:        resp.Name,
-		Price:       resp.Price,
-		Stock:       int(resp.Stock),
-		Category_id: int(resp.CategoryId),
-		Discount:    int(resp.Discount),
-	})
-}
-
+// @Success      200  {object}  helper.Message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /products/:id [Delete]
 func (h *SellerHandler) DeleteProduct(c echo.Context) error {
 	id1 := c.Param("id")
 	productID, err := strconv.Atoi(id1)
@@ -250,6 +221,20 @@ func (h *SellerHandler) DeleteProduct(c echo.Context) error {
 	})
 }
 
+// @Summary      Update Product
+// @Description  Seller can update a product
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Product ID"
+// @Param		 data body model.ProductInput true "The input product struct"
+// @Success      201  {object}  model.Product
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /products/:id [Put]
 func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 	id1 := c.Param("id")
 	productID, err := strconv.Atoi(id1)
@@ -283,8 +268,8 @@ func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 
 	resp, err := h.sellerGRPC.UpdateProduct(context.Background(), &in)
 	if err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
+		return echo.NewHTTPError(404, echo.Map{
+			"message": "product not found", // add custom err later
 		})
 	}
 
@@ -301,33 +286,46 @@ func (h *SellerHandler) UpdateProduct(c echo.Context) error {
 	})
 }
 
-// seller
-func (h *SellerHandler) AddSeller(c echo.Context) error {
-	var input model.Seller
-	if err := c.Bind(&input); err != nil {
-		return echo.NewHTTPError(400, echo.Map{
-			"message": "invalid input", // add custom err later
-		})
-	}
-
-	in := pb.AddSellerRequest{
-		SellerId: int32(input.ID),
-		Name:     input.Name,
-	}
-
-	resp, err := h.sellerGRPC.AddSeller(context.Background(), &in)
+// @Summary      Get Product By ID
+// @Description  Get products by product ID
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param ID path int true "Product ID"
+// @Success      200  {object}  model.Product
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /products/:id [Get]
+func (h *SellerHandler) GetProductByID(c echo.Context) error {
+	id := c.Param("id")
+	productID, err := strconv.Atoi(id)
 	if err != nil {
 		return echo.NewHTTPError(400, echo.Map{
 			"message": "invalid input", // add custom err later
 		})
 	}
 
-	return c.JSON(http.StatusCreated, echo.Map{
-		"message": "Seller successfully added!",
-		"seller": model.SellerIDName{
-			ID:   int(resp.SellerId),
-			Name: resp.Name,
-		},
+	in := pb.GetProductByIDRequest{
+		ProductId: int32(productID),
+	}
+
+	resp, err := h.sellerGRPC.GetProductByID(context.Background(), &in)
+	if err != nil {
+		return echo.NewHTTPError(404, echo.Map{
+			"message": "product not found", // add custom err later
+		})
+	}
+
+	return c.JSON(http.StatusOK, model.Product{
+		ID:          int(resp.Productid),
+		SellerID:    int(resp.SellerId),
+		Name:        resp.Name,
+		Price:       resp.Price,
+		Stock:       int(resp.Stock),
+		Category_id: int(resp.CategoryId),
+		Discount:    int(resp.Discount),
 	})
 }
 
@@ -337,9 +335,9 @@ func (h *SellerHandler) AddSeller(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  []model.Seller
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /sellers [Get]
 func (h *SellerHandler) GetAllSellers(c echo.Context) error {
 	resp, err := h.sellerGRPC.GetAllSellers(context.Background(), &emptypb.Empty{})
@@ -371,9 +369,9 @@ func (h *SellerHandler) GetAllSellers(c echo.Context) error {
 // @Produce      json
 // @Param ID path int true "Seller ID"
 // @Success      200  {object}  model.SellerDetail
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /sellers/:id [Get]
 func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 	id := c.Param("id")
@@ -417,9 +415,9 @@ func (h *SellerHandler) GetSellerByID(c echo.Context) error {
 // @Produce      json
 // @Param ID path string true "Seller Name"
 // @Success      200  {object}  model.SellerDetail
-// @Failure      400  {object}  helpers.message
-// @Failure      401  {object}  helpers.message
-// @Failure      500  {object}  helpers.message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
 // @Router       /sellers/name/:name [Get]
 func (h *SellerHandler) GetSellerByName(c echo.Context) error {
 	name := c.Param("name")
@@ -449,6 +447,18 @@ func (h *SellerHandler) GetSellerByName(c echo.Context) error {
 	})
 }
 
+// @Summary      Update Seller
+// @Description  Seller can update their name
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.SellerName true "The input name struct"
+// @Success      200  {object}  helper.Message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /sellers [Put]
 func (h *SellerHandler) UpdateSellerName(c echo.Context) error {
 	id := c.Get("id").(string)
 	sellerID, _ := strconv.Atoi(id)
