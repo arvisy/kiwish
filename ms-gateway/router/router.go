@@ -20,7 +20,7 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		customer.GET("/user", user.GetInfoCustomer)       // working kalo ganti jadi seller gabisa akses
 		customer.PUT("/user", user.UpdateCustomer)        // working
 		customer.DELETE("/user", user.DeleteCustomer)     // working
-		customer.POST("/user/address", user.AddAddress)   // working (perlu cek kalo user udah ada address)
+		customer.POST("/user/address", user.AddAddress)   // working
 		customer.PUT("/user/address", user.UpdateAddress) // working
 		customer.POST("/user/seller", user.CreateSeller)  // working
 	}

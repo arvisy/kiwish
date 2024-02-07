@@ -18,13 +18,13 @@ service UserService {
     rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
     rpc CreateSeller (CreateSellerRequest) returns (Empty);
 
-    // admin
+    // admin-customer
     rpc GetCustomerAdmin (GetCustomerAdminRequest) returns (GetCustomerAdminResponse);
     rpc GetAllCustomerAdmin (Empty) returns (GetAllCustomerAdminResponse);
     rpc UpdateCustomerAdmin (UpdateCustomerAdminRequest) returns (UpdateCustomerAdminResponse);
     rpc DeleteCustomerAdmin (DeleteCustomerAdminRequest) returns (Empty);
     
-    // seller
+    // admin-seller
     rpc GetSellerAdmin (GetSellerAdminRequest) returns (GetSellerAdminResponse);
     rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
     rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
