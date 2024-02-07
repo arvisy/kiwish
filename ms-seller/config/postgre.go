@@ -23,6 +23,11 @@ func Open(config PostgresConfig) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
+
+	db.SetMaxOpenConns(10)
+
+	db.SetMaxIdleConns(5)
+
 	return db, nil
 
 }
