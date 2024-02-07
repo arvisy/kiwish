@@ -25,6 +25,18 @@ func NewUserHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceCl
 	}
 }
 
+// @Summary      Register
+// @Description  Register user name, email, and password
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param		 data body model.User true "The input user struct"
+// @Success      201  {object}  model.RegisterResponse
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /register [Post]
 func (u *UserHandler) Register(c echo.Context) error {
 	var payload model.User
 
@@ -64,6 +76,18 @@ func (u *UserHandler) Register(c echo.Context) error {
 	return c.JSON(201, response)
 }
 
+// @Summary      Login
+// @Description  Login user with email and password
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param		 data body model.LoginRequest true "The input login struct"
+// @Success      200  {object}  model.LoginResponse
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /login [Post]
 func (u *UserHandler) Login(c echo.Context) error {
 	var loginRequest model.User
 	if err := c.Bind(&loginRequest); err != nil {
@@ -110,6 +134,17 @@ func (u *UserHandler) Login(c echo.Context) error {
 	})
 }
 
+// @Summary      Get User Info
+// @Description  Get a user's info
+// @Tags         Seller
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Success      201  {object}  model.User
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user [Get]
 func (u *UserHandler) GetInfoCustomer(c echo.Context) error {
 	userID := c.Get("id").(string)
 
