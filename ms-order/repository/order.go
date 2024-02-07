@@ -84,3 +84,18 @@ func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, e
 
 	return order, nil
 }
+func (r OrderRepo) UpdateOrderStatus(order *model.Order) (*model.Order, error) {
+	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
+
+	update := bson.M{ // update resi status
+		"$set": bson.M{
+			"Status": order.Status,
+		}}
+
+	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}

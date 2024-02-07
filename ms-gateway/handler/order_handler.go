@@ -124,3 +124,24 @@ func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (h OrderHandler) CustomerConfirmOrder(c echo.Context) error {
+	customerID := c.Get("id").(string)
+	orderID := c.Param("id")
+
+	in := pb.ConfirmOrderRequest{
+		OrderId:    orderID,
+		CustomerId: customerID,
+	}
+
+	_, err := h.orderGRPC.CustomerConfirmOrder(context.TODO(), &in)
+	if err != nil {
+		return echo.NewHTTPError(500, echo.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "order finished",
+	})
+}

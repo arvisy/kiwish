@@ -17,6 +17,7 @@ service OrderService {
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
   rpc TrackCourierShipment(TrackCourierShipmentRequest)
       returns (CourierResponse) {}
+  rpc CustomerConfirmOrder(ConfirmOrderRequest) returns (ConfirmOrderResponse) {}
   rpc GetCourierPrice(GetCourierPriceRequest)
       returns (GetCourierPriceResponse) {}
 }
@@ -289,6 +290,13 @@ message AddCourierInfoRequest {
 }
 
 message TrackCourierShipmentRequest { string order_id = 1; }
+
+message ConfirmOrderRequest {
+  string customer_id = 1;
+  string order_id = 2;
+}
+
+message ConfirmOrderResponse {}
 
 message CourierResponse {
   string awb = 1;
