@@ -1,5 +1,12 @@
 package model
 
+const (
+	ORDER_STATUS_UNPAID   = "UNPAID"
+	ORDER_STATUS_PACKED   = "PACKED"
+	ORDER_STATUS_SHIPPED  = "SHIPPED"
+	ORDER_STATUS_COMPLETE = "COMPLETE"
+)
+
 // import (
 // 	"time"
 
