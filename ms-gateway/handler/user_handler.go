@@ -367,7 +367,7 @@ func (u *UserHandler) GetCustomerAdmin(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(500, helper.Response{
-			Message: "failed to get user",
+			Message: "user not found",
 		})
 	}
 
@@ -447,7 +447,7 @@ func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(500, helper.Response{
-			Message: "failed to get seller",
+			Message: "seller not found",
 		})
 	}
 
