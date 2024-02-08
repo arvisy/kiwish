@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"ms-gateway/helper"
 	"ms-gateway/model"
 	"ms-gateway/pb"
@@ -11,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) echo.MiddlewareFunc {
+func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient, notifGRPC pb.NotificationServiceClient) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
@@ -76,6 +77,13 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 								return echo.NewHTTPError(http.StatusInternalServerError, errxendit)
 							}
 						}
+
+						// send notif seller
+						notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+							ReceiverId:  res.Order.Seller.Id,
+							Subject:     "Segera Proses Orderanmu",
+							Description: fmt.Sprintf("Hai %s anda telah menerima orderan #ID %v. Segera proses orderanmu", res.Order.Seller.Name, res.Order.Id),
+						})
 					}
 				}
 
@@ -137,6 +145,13 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 								return echo.NewHTTPError(http.StatusInternalServerError, errxendit)
 							}
 						}
+
+						// send notif seller
+						notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+							ReceiverId:  res.Order.Seller.Id,
+							Subject:     "Segera Proses Orderanmu",
+							Description: fmt.Sprintf("Hai %s anda telah menerima orderan #ID %v. Segera proses orderanmu", res.Order.Seller.Name, res.Order.Id),
+						})
 					}
 				}
 			}

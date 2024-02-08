@@ -18,20 +18,22 @@ type OrderHandler struct {
 	userGRPC   pb.UserServiceClient
 	sellerGRPC pb.SellerServiceClient
 	orderGRPC  pb.OrderServiceClient
+	notifGRPC  pb.NotificationServiceClient
 }
 
-func NewOrderHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) *OrderHandler {
+func NewOrderHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient, notifGRPC pb.NotificationServiceClient) *OrderHandler {
 	return &OrderHandler{
 		userGRPC:   userGRPC,
 		sellerGRPC: sellerGRPC,
 		orderGRPC:  orderGRPC,
+		notifGRPC:  notifGRPC,
 	}
 }
 
 func (h OrderHandler) CreateOrder(c echo.Context) error {
 	var input dto.ReqCreateOrderDirect
 	if err := c.Bind(&input); err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
@@ -105,6 +107,13 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	// send notif customer
+	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+		ReceiverId:  userid,
+		Subject:     "Segera Lakukan Pembayaran",
+		Description: fmt.Sprintf("Hai %s pesananmu dengan #ID %v belum dibayar. Segera lakukan pembayaran link: %v", res.Order.User.Name, res.Order.Id, res.Order.Payment.InvoiceUrl),
+	})
+
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order":   res.Order,
 		"message": "order created",
@@ -162,6 +171,15 @@ func (h OrderHandler) ConfirmOrder(c echo.Context) error {
 	role := c.Get("role").(string)
 	orderid := c.Param("id")
 
+	resorder, err := h.orderGRPC.OrderGetById(context.Background(), &pb.OrderGetByIdRequest{
+		Id:     orderid,
+		Userid: userid,
+		Role:   role,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	res, err := h.orderGRPC.OrderConfirmationAccept(context.Background(), &pb.OrderConfirmationAcceptRequest{
 		Id:     orderid,
 		Userid: userid,
@@ -170,6 +188,13 @@ func (h OrderHandler) ConfirmOrder(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
+	// send notif customer
+	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+		ReceiverId:  resorder.Order.User.Id,
+		Subject:     "Pesanan Diproses",
+		Description: fmt.Sprintf("Hai %s, pesananmu dengan #ID %v telah di proses oleh penjual", resorder.Order.User.Name, resorder.Order.Id),
+	})
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order_id": res.Id,
@@ -182,7 +207,12 @@ func (h OrderHandler) RejectOrder(c echo.Context) error {
 	role := c.Get("role").(string)
 	orderid := c.Param("id")
 
-	res, err := h.orderGRPC.OrderConfirmationCancel(context.Background(), &pb.OrderConfirmationCancelRequest{
+	var input dto.ReqRejectOrder
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	resorder, err := h.orderGRPC.OrderGetById(context.Background(), &pb.OrderGetByIdRequest{
 		Id:     orderid,
 		Userid: userid,
 		Role:   role,
@@ -190,6 +220,23 @@ func (h OrderHandler) RejectOrder(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
+	res, err := h.orderGRPC.OrderConfirmationCancel(context.Background(), &pb.OrderConfirmationCancelRequest{
+		Id:          orderid,
+		Userid:      userid,
+		Role:        role,
+		Description: input.CauseRejection,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	// send notif customer
+	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+		ReceiverId:  resorder.Order.User.Id,
+		Subject:     "Pesanan Dicancel",
+		Description: fmt.Sprintf("Hai %s, pesananmu dengan #ID %v telah di cancel oleh penjual. Berikut adalah alasannya: %v", resorder.Order.User.Name, resorder.Order.Id, input.CauseRejection),
+	})
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order_id": res.Id,

@@ -35,8 +35,8 @@ func SendRegisterInfo(email string, User model.User) error {
 	subject := fmt.Sprintf("Kiwish user registration")
 	content := fmt.Sprintf(`<h1>User successfully registered:</h1>
 				<h3>User Info</h3>
-				<p>User ID: %d</p>
-				<p>Name: %d</p>
+				<p>User ID: %s</p>
+				<p>Name: %s</p>
 				<p>Email: %s</p>`,
 		User.Id,
 		User.Name,
