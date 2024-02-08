@@ -43,6 +43,8 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						// update order
 						res, err := orderGRPC.OrderUpdate(context.Background(), &pb.OrderUpdateRequest{
 							Id:            o.Id,
+							Userid:        userid,
+							Role:          role,
 							OrderStatus:   model.ORDER_STATUS_PACKED,
 							PaymentStatus: "PAID",
 						})
@@ -102,6 +104,8 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						// update order
 						res, err := orderGRPC.OrderUpdate(context.Background(), &pb.OrderUpdateRequest{
 							Id:            o.Id,
+							Userid:        userid,
+							Role:          role,
 							OrderStatus:   model.ORDER_STATUS_PACKED,
 							PaymentStatus: "PAID",
 						})

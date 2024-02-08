@@ -275,8 +275,13 @@ func (s Service) OrderConfirmationAccept(ctx context.Context, in *orderpb.OrderC
 		}
 	}
 
+	if order.Status == model.ORDER_STATUS_SHIPPED || order.Status == model.ORDER_STATUS_COMPLETE || order.Status == model.ORDER_STATUS_CANCELED {
+		return nil, ErrInvalidArgument(fmt.Errorf("you order is being proccess, you cannnot change it"))
+	}
+
 	order.Confirmation.Status = model.ORDER_CONFIRMATION_ACCEPTED
 	order.Confirmation.Description = "OK"
+	order.Status = model.ORDER_STATUS_SHIPPED
 
 	err = s.repo.Order.Update(order)
 	if err != nil {
@@ -300,8 +305,13 @@ func (s Service) OrderConfirmationCancel(ctx context.Context, in *orderpb.OrderC
 		}
 	}
 
+	if order.Status == model.ORDER_STATUS_SHIPPED || order.Status == model.ORDER_STATUS_COMPLETE || order.Status == model.ORDER_STATUS_CANCELED {
+		return nil, ErrInvalidArgument(fmt.Errorf("you order is being proccess, you cannnot change it"))
+	}
+
 	order.Confirmation.Status = model.ORDER_CONFIRMATION_REJECTED
 	order.Confirmation.Description = in.Description
+	order.Status = model.ORDER_STATUS_CANCELED
 
 	err = s.repo.Order.Update(order)
 	if err != nil {
@@ -341,8 +351,11 @@ func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest
 		order.Shipment.Status = in.ShipmentStatus
 	}
 
-	if order.Status != model.ORDER_STATUS_COMPLETE && order.Status != model.ORDER_STATUS_CANCELED {
-		// order.Confirmation.Status = i
+	if in.ConfirmationStatus != "" {
+		order.Confirmation.Status = in.ConfirmationStatus
+	}
+
+	if in.Description != "" {
 		order.Confirmation.Description = in.Description
 	}
 

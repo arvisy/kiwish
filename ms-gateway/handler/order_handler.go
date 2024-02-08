@@ -129,6 +129,10 @@ func (h OrderHandler) GetAllOrder(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	if len(res.Orders) == 0 {
+		res.Orders = []*pb.Order{}
+	}
+
 	return c.JSON(http.StatusCreated, map[string]any{
 		"orders": res.Orders,
 	})

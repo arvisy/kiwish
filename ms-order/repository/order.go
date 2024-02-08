@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"ms-order/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -68,16 +69,30 @@ func (r OrderRepo) GetAll(userid int64, status string, role string) ([]model.Ord
 	var filter primitive.D
 	switch role {
 	case "2":
-		filter = bson.D{{Key: "$and", Value: bson.A{
-			bson.M{"user._id": userid},
-			bson.M{"status": status},
-		}}}
+		if status != "" {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"user._id": userid},
+				bson.M{"status": status},
+			}}}
+		} else {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"user._id": userid},
+			}}}
+		}
 	case "3":
-		filter = bson.D{{Key: "$and", Value: bson.A{
-			bson.M{"seller._id": userid},
-			bson.M{"status": status},
-		}}}
+		if status != "" {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"seller._id": userid},
+				bson.M{"status": status},
+			}}}
+		} else {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"seller._id": userid},
+			}}}
+		}
 	}
+
+	fmt.Println("AAAAAA")
 
 	var result = []model.Order{}
 	cursor, err := r.coll.Find(context.Background(), filter)
