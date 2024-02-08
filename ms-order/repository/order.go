@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"ms-order/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -106,8 +105,6 @@ func (r OrderRepo) GetAll(userid int64, status string, role string) ([]model.Ord
 			}}}
 		}
 	}
-
-	fmt.Println("AAAAAA")
 
 	var result = []model.Order{}
 	cursor, err := r.coll.Find(context.Background(), filter)
