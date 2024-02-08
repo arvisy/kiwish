@@ -214,10 +214,16 @@ func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
 
 func (h OrderHandler) CustomerConfirmOrder(c echo.Context) error {
 	customerID := c.Get("id").(string)
-	orderID := c.Param("id")
 
+	var input model.ConfirmOrderID
+	if err := c.Bind(&input); err != nil {
+		fmt.Println(err)
+		return echo.NewHTTPError(400, echo.Map{
+			"message": "invalid input", // add custom err later
+		})
+	}
 	in := pb.ConfirmOrderRequest{
-		OrderId:    orderID,
+		OrderId:    strconv.Itoa(input.OrderID),
 		CustomerId: customerID,
 	}
 
