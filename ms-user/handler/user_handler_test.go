@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/assert/v2"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/redis/go-redis/v9"
 )
 
 func TestRegister_Success(t *testing.T) {
@@ -21,7 +22,9 @@ func TestRegister_Success(t *testing.T) {
 
 	userRepository := repository.NewUserRepository(testDB)
 
-	userHandler := NewUserHandler(*userRepository)
+	Redis := redis.Client{}
+
+	userHandler := NewUserHandler(*userRepository, &Redis)
 
 	testCases := []struct {
 		name     string

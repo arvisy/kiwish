@@ -8,7 +8,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-redis/redismock/v9"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,9 +21,11 @@ func TestGetProductByID_Success(t *testing.T) {
 	}
 	defer testDB.Close()
 
+	db, _ := redismock.NewClientMock()
+
 	sellerRepository := repository.NewPostgresRepository(testDB)
 
-	sellerHandler := NewSellerService(sellerRepository)
+	sellerHandler := NewSellerService(sellerRepository, db)
 
 	_, err = testDB.Exec(`INSERT INTO products (seller_id, name, price, stock, category_id) VALUES (?, ?, ?, ?, ?)`,
 		1, "Baju", 10.0, 12, 1)
@@ -82,8 +86,10 @@ func TestGetSellerByID_Success(t *testing.T) {
 		t.Fatalf("Error inserting test data into sellers table: %v", err)
 	}
 
+	Redis := redis.Client{}
+
 	sellerRepository := repository.NewPostgresRepository(testDB)
-	sellerHandler := NewSellerService(sellerRepository)
+	sellerHandler := NewSellerService(sellerRepository, &Redis)
 
 	testCases := []struct {
 		name     string
