@@ -6,5 +6,5 @@ type CourierRequest struct {
 }
 
 type ConfirmOrderID struct {
-	OrderID int `json:"order_id"`
+	OrderID string `json:"order_id"`
 }
