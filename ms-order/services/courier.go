@@ -10,7 +10,46 @@ import (
 	"strings"
 )
 
-func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
+func (s Service) GetCourierPrice(ctx context.Context, in *pb.GetCourierPriceRequest) (*pb.GetCourierPriceResponse, error) {
+	res, err := s.client.Courier.GetPrice(in.Origin, in.Destination, in.Company)
+	if err != nil {
+		return nil, ErrInternal(err, s.log)
+	}
+
+	response := &pb.GetCourierPriceResponse{
+		Origin: &pb.GetCourierPriceResponse_Detail{
+			CityId:     res.Rajaongkir.OriginDetails.CityID,
+			ProvinceId: res.Rajaongkir.OriginDetails.ProvinceID,
+			Province:   res.Rajaongkir.OriginDetails.Province,
+			Type:       res.Rajaongkir.OriginDetails.Type,
+			CityName:   res.Rajaongkir.OriginDetails.CityName,
+			PostalCode: res.Rajaongkir.OriginDetails.PostalCode,
+		},
+		Destination: &pb.GetCourierPriceResponse_Detail{
+			CityId:     res.Rajaongkir.DestinationDetails.CityID,
+			ProvinceId: res.Rajaongkir.DestinationDetails.ProvinceID,
+			Province:   res.Rajaongkir.DestinationDetails.Province,
+			Type:       res.Rajaongkir.DestinationDetails.Type,
+			CityName:   res.Rajaongkir.DestinationDetails.CityName,
+			PostalCode: res.Rajaongkir.DestinationDetails.PostalCode,
+		},
+		Cost: &pb.GetCourierPriceResponse_Cost{},
+	}
+
+	for _, r := range res.Rajaongkir.Results {
+		response.Cost.Company = r.Code
+		for _, val := range r.Costs {
+			if in.Service == val.Service {
+				response.Cost.Service = val.Service
+				response.Cost.Price = val.Cost[0].Value
+			}
+		}
+	}
+
+	return response, nil
+}
+
+func (s Service) AddCourierInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
 	order, err := s.repo.Order.GetByID(in.OrderId)
 	if err != nil {
 		return nil, err
