@@ -1,9 +1,8 @@
 CREATE TABLE "sellers" (
-  "id" serial PRIMARY KEY,
-  "user_id" int NOT NULL UNIQUE,
+  "id" int PRIMARY KEY,
   "name" varchar NOT NULL UNIQUE,
-  "address_id" int NOT NULL,
-  "last_active" date NOT NULL
+  "address_id" int,
+  "last_active" date 
 );
 
 CREATE TABLE "address" (

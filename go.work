@@ -1,8 +1,9 @@
 go 1.21.4
 
 use (
-    ./ms-gateway
-    ./ms-order
-    ./ms-seller
-    ./ms-user
+	./ms-gateway
+	./ms-order
+	./ms-seller
+	./ms-user
+	./ms-notification
 )

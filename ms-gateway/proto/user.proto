@@ -1,0 +1,190 @@
+syntax = "proto3";
+
+package user;
+
+option go_package="../pb";
+
+service UserService {
+    // user
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+
+    // customer
+    rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
+    rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
+    rpc DeleteCustomer (DeleteCustomerRequest) returns (Empty);
+    rpc AddAddress (AddAddressRequest) returns (AddAddressResponse);
+    rpc GetUserAddress (GetUserAddressRequest) returns (GetUserAddressResponse);
+    rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
+    rpc CreateSeller (CreateSellerRequest) returns (Empty);
+
+    // admin-customer
+    rpc GetCustomerAdmin (GetCustomerAdminRequest) returns (GetCustomerAdminResponse);
+    rpc GetAllCustomerAdmin (Empty) returns (GetAllCustomerAdminResponse);
+    rpc UpdateCustomerAdmin (UpdateCustomerAdminRequest) returns (UpdateCustomerAdminResponse);
+    rpc DeleteCustomerAdmin (DeleteCustomerAdminRequest) returns (Empty);
+    
+    // admin-seller
+    rpc GetSellerAdmin (GetSellerAdminRequest) returns (GetSellerAdminResponse);
+    rpc GetAllSellerAdmin (Empty) returns (GetAllSellerAdminResponse);
+    rpc DeleteSellerAdmin (DeleteSellerAdminRequest) returns (Empty);
+    
+
+    // rpc ReportSales (Empty) returns (Empty);
+    // rpc CreateFlashSale (Empty) returns (Empty);
+}
+
+message Empty {}
+
+message RegisterRequest {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message RegisterResponse {
+    string name = 1;
+    string email = 2;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string id = 1;
+    string role = 2;
+    string name = 3;
+    string email = 4; 
+}
+
+message GetCustomerRequest {
+    string id = 1;
+}
+
+message GetCustomerResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message UpdateCustomerRequest {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateCustomerResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message DeleteCustomerRequest {
+    string id = 1;
+}
+
+message AddAddressRequest {
+    string user_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message GetUserAddressRequest {
+    string user_id = 1;
+}
+
+message GetUserAddressResponse {
+    string address_id = 1;
+    string address = 2;
+    string regency = 3;
+    string city = 4;
+}
+
+message AddAddressResponse {
+    string address = 1;
+    string regency = 2;
+    string city = 3;
+}
+
+message UpdateAddressRequest {
+    string user_id = 1;
+    string address_id = 2;
+    string address = 3;
+    string regency = 4;
+    string city = 5;
+}
+
+message UpdateAddressResponse {
+    string address = 1;
+    string regency = 2;
+    string city = 3;
+}
+
+message GetCustomerAdminRequest {
+    string user_id = 1;
+}
+
+message GetCustomerAdminResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetAllCustomerAdminResponse {
+    repeated CustomerResponse customers = 1;
+}
+
+message CustomerResponse {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message UpdateCustomerAdminRequest {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateCustomerAdminResponse {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message DeleteCustomerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminRequest {
+    string id = 1;
+}
+
+message GetSellerAdminResponse {
+    string name = 1;
+    string email = 2;
+}
+
+message GetAllSellerAdminResponse {
+    repeated SellerResponseAdmin sellers = 1;
+}
+
+message SellerResponseAdmin {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message DeleteSellerAdminRequest {
+    string id = 1;
+}
+
+message CreateSellerRequest {
+    string id = 1;
+}
+
