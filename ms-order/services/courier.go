@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"ms-order/helpers"
 	"ms-order/model"
 	"ms-order/pb"
+	"strconv"
 	"strings"
 )
 
@@ -76,6 +78,23 @@ func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierSh
 		return nil, err
 	}
 
+	if order.Shipment.Status != "DELIVERED" && info.Data.Summary.Status == "DELIVERED" {
+		inputShipment := model.Shipment{
+			NoResi:  info.Data.Summary.AWB,
+			Company: order.Shipment.Company,
+			Service: order.Shipment.Service,
+			Status:  info.Data.Summary.Status,
+			Price:   order.Shipment.Price,
+		}
+
+		order.Shipment = inputShipment
+
+		_, err = s.repo.Order.UpdateShipmentResiStatus(order)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	var list []*pb.HistoryResponse
 
 	for _, v := range info.Data.History {
@@ -97,4 +116,41 @@ func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierSh
 	}
 
 	return &resp, nil
+}
+
+func (s Service) CustomerConfirmOrder(ctx context.Context, in *pb.ConfirmOrderRequest) (*pb.ConfirmOrderResponse, error) {
+	order, err := s.repo.Order.GetOrder(in.OrderId)
+	if err != nil {
+		return nil, err
+	}
+
+	if strconv.Itoa(int(order.User.ID)) != in.CustomerId {
+		return nil, fmt.Errorf("order id invalid")
+	}
+
+	if order.Shipment.Status != "DELIVERED" {
+		inputShipment := model.Shipment{
+			NoResi:  order.Shipment.NoResi,
+			Company: order.Shipment.Company,
+			Service: order.Shipment.Service,
+			Status:  "DELIVERED",
+			Price:   order.Shipment.Price,
+		}
+
+		order.Shipment = inputShipment
+
+		_, err = s.repo.Order.UpdateShipmentResiStatus(order)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	order.Status = model.ORDER_STATUS_COMPLETE
+
+	_, err = s.repo.Order.UpdateOrderStatus(order)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ConfirmOrderResponse{}, nil
 }
