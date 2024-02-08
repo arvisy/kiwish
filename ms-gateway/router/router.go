@@ -63,8 +63,10 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 	o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC))
 	{
 		o.POST("", order.CreateOrder)
-		o.GET("/customer", order.GetAllOrderForCustomer, middleware.CustomerAuth)
-		o.GET("/seller", order.GetAllOrderForSeller, middleware.SellerAuth)
+		o.GET("", order.GetAllOrder)
+		o.GET("/:id", order.GetByIdOrder)
+		o.POST("/accept/:id", order.ConfirmOrder, middleware.SellerAuth)
+		o.POST("/reject/:id", order.RejectOrder, middleware.SellerAuth)
 		o.POST("/courier/:id", order.AddCourierinfo, middleware.SellerAuth)
 		o.GET("/courier/:id", order.TrackCourierShipment)
 		o.PUT("", order.CustomerConfirmOrder, middleware.CustomerAuth)
