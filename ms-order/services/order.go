@@ -96,38 +96,44 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 	}
 
 	response := &orderpb.OrderCreateResponse{
-		Id:     order.ID.Hex(),
-		Status: order.Status,
-		User: &orderpb.OrderCreateResponse_User{
-			Id:      order.User.ID,
-			Name:    order.User.Name,
-			Address: order.User.Address,
-			City:    order.User.City,
+		Order: &orderpb.Order{
+			Id:     order.ID.Hex(),
+			Status: order.Status,
+			User: &orderpb.Order_User{
+				Id:      order.User.ID,
+				Name:    order.User.Name,
+				Address: order.User.Address,
+				City:    order.User.City,
+			},
+			Seller: &orderpb.Order_Seller{
+				Id:      order.Seller.ID,
+				Name:    order.Seller.Name,
+				Address: order.Seller.Address,
+				City:    order.Seller.City,
+			},
+			Payment: &orderpb.Order_Payment{
+				InvoiceId:  order.Payment.InvoiceID,
+				InvoiceUrl: order.Payment.InvoiceURL,
+				Method:     order.Payment.Method,
+				Status:     order.Payment.Status,
+			},
+			Shipment: &orderpb.Order_Shipment{
+				Company: order.Shipment.Company,
+				Service: order.Shipment.Service,
+				Price:   order.Shipment.Price,
+			},
+			Confirmation: &orderpb.Order_Confirmation{
+				Status:      model.ORDER_CONFIRMATION_WAITING,
+				Description: "",
+			},
+			Subtotal:  order.Subtotal,
+			Total:     order.Total,
+			CreatedAt: timestamppb.New(order.CreatedAt),
 		},
-		Seller: &orderpb.OrderCreateResponse_Seller{
-			Id:      order.Seller.ID,
-			Name:    order.Seller.Name,
-			Address: order.Seller.Address,
-			City:    order.Seller.City,
-		},
-		Payment: &orderpb.OrderCreateResponse_Payment{
-			InvoiceId:  order.Payment.InvoiceID,
-			InvoiceUrl: order.Payment.InvoiceURL,
-			Method:     order.Payment.Method,
-			Status:     order.Payment.Status,
-		},
-		Shipment: &orderpb.OrderCreateResponse_Shipment{
-			Company: order.Shipment.Company,
-			Service: order.Shipment.Service,
-			Price:   order.Shipment.Price,
-		},
-		Subtotal:  order.Subtotal,
-		Total:     order.Total,
-		CreatedAt: timestamppb.New(order.CreatedAt),
 	}
 
 	for _, p := range order.Products {
-		response.Products = append(response.Products, &orderpb.OrderCreateResponse_Product{
+		response.Order.Products = append(response.Order.Products, &orderpb.Order_Product{
 			Id:       int64(p.ID),
 			Name:     p.Name,
 			Price:    p.Price,
@@ -138,36 +144,40 @@ func (s Service) OrderCreate(ctx context.Context, in *orderpb.OrderCreateRequest
 	return response, nil
 }
 
-func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGetAllForCustomerRequest) (*orderpb.OrderGetAllForCustomerResponse, error) {
-	orders, err := s.repo.Order.GetAllForCustomer(in.Userid, in.Status)
+func (s Service) OrderGetAll(ctx context.Context, in *orderpb.OrderGetAllRequest) (*orderpb.OrderGetAllResponse, error) {
+	orders, err := s.repo.Order.GetAll(in.Userid, in.Status, in.Role)
 	if err != nil {
 		return nil, err
 	}
 
-	var response = &orderpb.OrderGetAllForCustomerResponse{}
+	var response = &orderpb.OrderGetAllResponse{}
 	for idx, order := range orders {
-		response.Orders = append(response.Orders, &orderpb.OrderGetAllForCustomerResponse_Orders{
+		response.Orders = append(response.Orders, &orderpb.Order{
 			Id:     order.ID.Hex(),
 			Status: order.Status,
-			User: &orderpb.OrderGetAllForCustomerResponse_Orders_User{
+			Confirmation: &orderpb.Order_Confirmation{
+				Status:      order.Confirmation.Status,
+				Description: order.Confirmation.Description,
+			},
+			User: &orderpb.Order_User{
 				Id:      order.User.ID,
 				Name:    order.User.Name,
 				Address: order.User.Address,
 				City:    order.User.City,
 			},
-			Seller: &orderpb.OrderGetAllForCustomerResponse_Orders_Seller{
+			Seller: &orderpb.Order_Seller{
 				Id:      order.Seller.ID,
 				Name:    order.Seller.Name,
 				Address: order.Seller.Address,
 				City:    order.Seller.City,
 			},
-			Payment: &orderpb.OrderGetAllForCustomerResponse_Orders_Payment{
+			Payment: &orderpb.Order_Payment{
 				InvoiceId:  order.Payment.InvoiceID,
 				InvoiceUrl: order.Payment.InvoiceURL,
 				Method:     order.Payment.Method,
 				Status:     order.Payment.Status,
 			},
-			Shipment: &orderpb.OrderGetAllForCustomerResponse_Orders_Shipment{
+			Shipment: &orderpb.Order_Shipment{
 				Company: order.Shipment.Company,
 				Service: order.Shipment.Service,
 				Price:   order.Shipment.Price,
@@ -180,7 +190,7 @@ func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGe
 		})
 
 		for _, p := range order.Products {
-			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForCustomerResponse_Orders_Product{
+			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.Order_Product{
 				Id:       int64(p.ID),
 				Name:     p.Name,
 				Price:    p.Price,
@@ -192,62 +202,120 @@ func (s Service) OrderGetAllForCustomer(ctx context.Context, in *orderpb.OrderGe
 	return response, nil
 }
 
-func (s Service) OrderGetAllForSeller(ctx context.Context, in *orderpb.OrderGetAllForSellerRequest) (*orderpb.OrderGetAllForSellerResponse, error) {
-	orders, err := s.repo.Order.GetAllForCustomer(in.Sellerid, in.Status)
+func (s Service) OrderGetById(ctx context.Context, in *orderpb.OrderGetByIdRequest) (*orderpb.OrderGetByIdResponse, error) {
+	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
 	if err != nil {
-		return nil, err
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return nil, ErrNotFound("order not found")
+		default:
+			return nil, ErrInternal(err, s.log)
+		}
 	}
 
-	var response = &orderpb.OrderGetAllForSellerResponse{}
-	for idx, order := range orders {
-		response.Orders = append(response.Orders, &orderpb.OrderGetAllForSellerResponse_Orders{
-			Id:     order.ID.Hex(),
-			Status: order.Status,
-			User: &orderpb.OrderGetAllForSellerResponse_Orders_User{
+	var response = &orderpb.OrderGetByIdResponse{
+		Order: &orderpb.Order{
+			Id: order.ID.Hex(),
+			User: &orderpb.Order_User{
 				Id:      order.User.ID,
 				Name:    order.User.Name,
 				Address: order.User.Address,
 				City:    order.User.City,
 			},
-			Seller: &orderpb.OrderGetAllForSellerResponse_Orders_Seller{
+			Seller: &orderpb.Order_Seller{
 				Id:      order.Seller.ID,
 				Name:    order.Seller.Name,
 				Address: order.Seller.Address,
 				City:    order.Seller.City,
 			},
-			Payment: &orderpb.OrderGetAllForSellerResponse_Orders_Payment{
+			Shipment: &orderpb.Order_Shipment{
+				NoResi:  order.Shipment.NoResi,
+				Company: order.Shipment.Company,
+				Service: order.Shipment.Service,
+				Status:  order.Shipment.Status,
+				Price:   order.Shipment.Price,
+			},
+			Payment: &orderpb.Order_Payment{
 				InvoiceId:  order.Payment.InvoiceID,
 				InvoiceUrl: order.Payment.InvoiceURL,
 				Method:     order.Payment.Method,
 				Status:     order.Payment.Status,
 			},
-			Shipment: &orderpb.OrderGetAllForSellerResponse_Orders_Shipment{
-				Company: order.Shipment.Company,
-				Service: order.Shipment.Service,
-				Price:   order.Shipment.Price,
-				NoResi:  order.Shipment.NoResi,
-				Status:  order.Shipment.Status,
+			Confirmation: &orderpb.Order_Confirmation{
+				Status:      order.Confirmation.Status,
+				Description: order.Confirmation.Description,
 			},
 			Subtotal:  order.Subtotal,
 			Total:     order.Total,
+			Status:    order.Status,
 			CreatedAt: timestamppb.New(order.CreatedAt),
-		})
+		},
+	}
 
-		for _, p := range order.Products {
-			response.Orders[idx].Products = append(response.Orders[idx].Products, &orderpb.OrderGetAllForSellerResponse_Orders_Product{
-				Id:       int64(p.ID),
-				Name:     p.Name,
-				Price:    p.Price,
-				Quantity: p.Quantity,
-			})
-		}
+	for _, p := range order.Products {
+		response.Order.Products = append(response.Order.Products, &orderpb.Order_Product{
+			Id:       int64(p.ID),
+			Name:     p.Name,
+			Price:    p.Price,
+			Quantity: p.Quantity,
+		})
 	}
 
 	return response, nil
+}
+
+func (s Service) OrderConfirmationAccept(ctx context.Context, in *orderpb.OrderConfirmationAcceptRequest) (*orderpb.OrderConfirmationAcceptResponse, error) {
+	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	if err != nil {
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return nil, ErrNotFound("order not found")
+		default:
+			return nil, ErrInternal(err, s.log)
+		}
+	}
+
+	order.Confirmation.Status = model.ORDER_CONFIRMATION_ACCEPTED
+	order.Confirmation.Description = "OK"
+
+	err = s.repo.Order.Update(order)
+	if err != nil {
+		return nil, ErrInternal(err, s.log)
+	}
+
+	return &orderpb.OrderConfirmationAcceptResponse{
+		Id:      order.ID.Hex(),
+		Message: "OK",
+	}, nil
+}
+
+func (s Service) OrderConfirmationCancel(ctx context.Context, in *orderpb.OrderConfirmationCancelRequest) (*orderpb.OrderConfirmationCancelResponse, error) {
+	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	if err != nil {
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return nil, ErrNotFound("order not found")
+		default:
+			return nil, ErrInternal(err, s.log)
+		}
+	}
+
+	order.Confirmation.Status = model.ORDER_CONFIRMATION_REJECTED
+	order.Confirmation.Description = in.Description
+
+	err = s.repo.Order.Update(order)
+	if err != nil {
+		return nil, ErrInternal(err, s.log)
+	}
+
+	return &orderpb.OrderConfirmationCancelResponse{
+		Id:      order.ID.Hex(),
+		Message: "OK",
+	}, nil
 }
 
 func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest) (*orderpb.OrderUpdateResponse, error) {
-	order, err := s.repo.Order.GetByID(in.Id)
+	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
 	if err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
@@ -273,38 +341,47 @@ func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest
 		order.Shipment.Status = in.ShipmentStatus
 	}
 
+	if order.Status != model.ORDER_STATUS_COMPLETE && order.Status != model.ORDER_STATUS_CANCELED {
+		// order.Confirmation.Status = i
+		order.Confirmation.Description = in.Description
+	}
+
 	err = s.repo.Order.Update(order)
 	if err != nil {
 		return nil, ErrInternal(err, s.log)
 	}
 
 	var response = &orderpb.OrderUpdateResponse{
-		Orders: &orderpb.OrderUpdateResponse_Orders{
+		Order: &orderpb.Order{
 			Id: order.ID.Hex(),
-			User: &orderpb.OrderUpdateResponse_Orders_User{
+			User: &orderpb.Order_User{
 				Id:      order.User.ID,
 				Name:    order.User.Name,
 				Address: order.User.Address,
 				City:    order.User.City,
 			},
-			Seller: &orderpb.OrderUpdateResponse_Orders_Seller{
+			Seller: &orderpb.Order_Seller{
 				Id:      order.Seller.ID,
 				Name:    order.Seller.Name,
 				Address: order.Seller.Address,
 				City:    order.Seller.City,
 			},
-			Shipment: &orderpb.OrderUpdateResponse_Orders_Shipment{
+			Shipment: &orderpb.Order_Shipment{
 				NoResi:  order.Shipment.NoResi,
 				Company: order.Shipment.Company,
 				Service: order.Shipment.Service,
 				Status:  order.Shipment.Status,
 				Price:   order.Shipment.Price,
 			},
-			Payment: &orderpb.OrderUpdateResponse_Orders_Payment{
+			Payment: &orderpb.Order_Payment{
 				InvoiceId:  order.Payment.InvoiceID,
 				InvoiceUrl: order.Payment.InvoiceURL,
 				Method:     order.Payment.Method,
 				Status:     order.Payment.Status,
+			},
+			Confirmation: &orderpb.Order_Confirmation{
+				Status:      order.Confirmation.Status,
+				Description: order.Confirmation.Description,
 			},
 			Subtotal:  order.Subtotal,
 			Total:     order.Total,
@@ -314,7 +391,7 @@ func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest
 	}
 
 	for _, p := range order.Products {
-		response.Orders.Products = append(response.Orders.Products, &orderpb.OrderUpdateResponse_Orders_Product{
+		response.Order.Products = append(response.Order.Products, &orderpb.Order_Product{
 			Id:       int64(p.ID),
 			Name:     p.Name,
 			Price:    p.Price,
@@ -323,5 +400,4 @@ func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest
 	}
 
 	return response, nil
-	//
 }
