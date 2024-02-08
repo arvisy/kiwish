@@ -91,6 +91,7 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 			Address: seller.AddressName,
 			City:    seller.AddressCity,
 		},
+
 		Products: productsreq,
 		Shipment: &pb.OrderCreateRequest_Shipment{
 			Company: input.Shipment.Company,
@@ -99,26 +100,28 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 		PaymentMethod: input.PaymentMethod,
 	}
 
-	order, err := h.orderGRPC.OrderCreate(context.Background(), &req)
+	res, err := h.orderGRPC.OrderCreate(context.Background(), &req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusCreated, map[string]any{
-		"order":   order,
+		"order":   res.Order,
 		"message": "order created",
 	})
 }
 
-func (h OrderHandler) GetAllOrderForCustomer(c echo.Context) error {
+func (h OrderHandler) GetAllOrder(c echo.Context) error {
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	role := c.Get("role").(string)
 	paramstatus := strings.ToUpper(c.QueryParam("status"))
 
 	if paramstatus != "" && !helper.ValidOrderStatus(paramstatus) {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid status query param")
 	}
 
-	res, err := h.orderGRPC.OrderGetAllForCustomer(context.Background(), &pb.OrderGetAllForCustomerRequest{
+	res, err := h.orderGRPC.OrderGetAll(context.Background(), &pb.OrderGetAllRequest{
+		Role:   role,
 		Userid: userid,
 		Status: paramstatus,
 	})
@@ -126,29 +129,71 @@ func (h OrderHandler) GetAllOrderForCustomer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	if len(res.Orders) == 0 {
+		res.Orders = []*pb.Order{}
+	}
+
 	return c.JSON(http.StatusCreated, map[string]any{
 		"orders": res.Orders,
 	})
 }
 
-func (h OrderHandler) GetAllOrderForSeller(c echo.Context) error {
-	sellerid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
-	paramstatus := strings.ToUpper(c.QueryParam("status"))
+func (h OrderHandler) GetByIdOrder(c echo.Context) error {
+	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	role := c.Get("role").(string)
+	orderid := c.Param("id")
 
-	if paramstatus != "" && !helper.ValidOrderStatus(paramstatus) {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid status query param")
-	}
-
-	res, err := h.orderGRPC.OrderGetAllForSeller(context.Background(), &pb.OrderGetAllForSellerRequest{
-		Sellerid: sellerid,
-		Status:   paramstatus,
+	res, err := h.orderGRPC.OrderGetById(context.Background(), &pb.OrderGetByIdRequest{
+		Id:     orderid,
+		Role:   role,
+		Userid: userid,
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusCreated, map[string]any{
-		"orders": res.Orders,
+		"order": res.Order,
+	})
+}
+
+func (h OrderHandler) ConfirmOrder(c echo.Context) error {
+	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	role := c.Get("role").(string)
+	orderid := c.Param("id")
+
+	res, err := h.orderGRPC.OrderConfirmationAccept(context.Background(), &pb.OrderConfirmationAcceptRequest{
+		Id:     orderid,
+		Userid: userid,
+		Role:   role,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"order_id": res.Id,
+		"message":  res.Message,
+	})
+}
+
+func (h OrderHandler) RejectOrder(c echo.Context) error {
+	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
+	role := c.Get("role").(string)
+	orderid := c.Param("id")
+
+	res, err := h.orderGRPC.OrderConfirmationCancel(context.Background(), &pb.OrderConfirmationCancelRequest{
+		Id:     orderid,
+		Userid: userid,
+		Role:   role,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"order_id": res.Id,
+		"message":  res.Message,
 	})
 }
 

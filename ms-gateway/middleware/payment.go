@@ -19,8 +19,9 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 
 			switch {
 			case role == "2": // customer
-				res, err := orderGRPC.OrderGetAllForCustomer(context.Background(), &pb.OrderGetAllForCustomerRequest{
+				res, err := orderGRPC.OrderGetAll(context.Background(), &pb.OrderGetAllRequest{
 					Userid: userid,
+					Role:   role,
 					Status: model.ORDER_STATUS_UNPAID,
 				})
 				if err != nil {
@@ -42,6 +43,8 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						// update order
 						res, err := orderGRPC.OrderUpdate(context.Background(), &pb.OrderUpdateRequest{
 							Id:            o.Id,
+							Userid:        userid,
+							Role:          role,
 							OrderStatus:   model.ORDER_STATUS_PACKED,
 							PaymentStatus: "PAID",
 						})
@@ -50,7 +53,7 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						}
 
 						// update stock
-						for _, p := range res.Orders.Products {
+						for _, p := range res.Order.Products {
 							res, err := sellerGRPC.GetProductByID(context.Background(), &pb.GetProductByIDRequest{
 								ProductId: int32(p.Id),
 							})
@@ -77,9 +80,10 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 				}
 
 			case role == "3": // seller
-				res, err := orderGRPC.OrderGetAllForSeller(context.Background(), &pb.OrderGetAllForSellerRequest{
-					Sellerid: userid,
-					Status:   model.ORDER_STATUS_UNPAID,
+				res, err := orderGRPC.OrderGetAll(context.Background(), &pb.OrderGetAllRequest{
+					Userid: userid,
+					Role:   role,
+					Status: model.ORDER_STATUS_UNPAID,
 				})
 				if err != nil {
 					return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -100,6 +104,8 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						// update order
 						res, err := orderGRPC.OrderUpdate(context.Background(), &pb.OrderUpdateRequest{
 							Id:            o.Id,
+							Userid:        userid,
+							Role:          role,
 							OrderStatus:   model.ORDER_STATUS_PACKED,
 							PaymentStatus: "PAID",
 						})
@@ -108,7 +114,7 @@ func CheckPayment(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClie
 						}
 
 						// update stock
-						for _, p := range res.Orders.Products {
+						for _, p := range res.Order.Products {
 							res, err := sellerGRPC.GetProductByID(context.Background(), &pb.GetProductByIDRequest{
 								ProductId: int32(p.Id),
 							})
