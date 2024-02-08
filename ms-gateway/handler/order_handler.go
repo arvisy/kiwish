@@ -253,7 +253,19 @@ func (h OrderHandler) RejectOrder(c echo.Context) error {
 	})
 }
 
-// /orders/:id [put]
+// @Summary      Add Courier Info
+// @Description  Seller add courier info to order
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Param		 data body model.CourierRequest true "The input courier struct"
+// @Success      200  {object}  model.Courier
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /courier/:id [Put]
 func (h OrderHandler) AddCourierinfo(c echo.Context) error {
 	sellerID := c.Get("id").(string)
 
@@ -290,6 +302,18 @@ func (h OrderHandler) AddCourierinfo(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// @Summary      Track Shipment
+// @Description  User or Seller can track courier status
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Success      200  {object}  model.Courier
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /courier/:id [Get]
 func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
 	orderID := c.Param("id")
 	_, err := strconv.Atoi(orderID) // check if param is not a digit
