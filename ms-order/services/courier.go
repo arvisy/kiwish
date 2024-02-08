@@ -11,14 +11,10 @@ import (
 )
 
 func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoRequest) (*pb.CourierResponse, error) {
-	order, err := s.repo.Order.GetOrder(in.OrderId)
+	order, err := s.repo.Order.GetByID(in.OrderId)
 	if err != nil {
 		return nil, err
 	}
-
-	// if strconv.Itoa(int(order.Seller.ID)) != in.SellerId {
-	// 	return nil, fmt.Errorf("order id invalid")
-	// }
 
 	// company = jne, pos, jnt_cargo,sicepat, tiki, anteraja, ninja, lion
 	// jet, dll
@@ -66,7 +62,7 @@ func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoReque
 }
 
 func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierShipmentRequest) (*pb.CourierResponse, error) {
-	order, err := s.repo.Order.GetOrder(in.OrderId)
+	order, err := s.repo.Order.GetByID(in.OrderId)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +115,7 @@ func (s Service) TrackCourierShipment(ctx context.Context, in *pb.TrackCourierSh
 }
 
 func (s Service) CustomerConfirmOrder(ctx context.Context, in *pb.ConfirmOrderRequest) (*pb.ConfirmOrderResponse, error) {
-	order, err := s.repo.Order.GetOrder(in.OrderId)
+	order, err := s.repo.Order.GetByID(in.OrderId)
 	if err != nil {
 		return nil, err
 	}
