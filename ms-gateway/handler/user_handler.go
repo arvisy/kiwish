@@ -118,9 +118,6 @@ func (u *UserHandler) Login(c echo.Context) error {
 		"role": response.Role,
 	}
 
-	fmt.Println("id: ", response.Id)
-	fmt.Println("role: ", response.Role)
-
 	token, err := helper.GenerateJWTTokenWithClaims(claims)
 	if err != nil {
 		return c.JSON(500, helper.Response{
@@ -370,7 +367,7 @@ func (u *UserHandler) GetCustomerAdmin(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(500, helper.Response{
-			Message: "failed to get user",
+			Message: "user not found",
 		})
 	}
 
@@ -450,7 +447,7 @@ func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(500, helper.Response{
-			Message: "failed to get seller",
+			Message: "seller not found",
 		})
 	}
 

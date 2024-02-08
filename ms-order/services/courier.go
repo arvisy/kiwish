@@ -2,11 +2,9 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"ms-order/helpers"
 	"ms-order/model"
 	"ms-order/pb"
-	"strconv"
 	"strings"
 )
 
@@ -16,9 +14,9 @@ func (s Service) AddShipmentInfo(ctx context.Context, in *pb.AddCourierInfoReque
 		return nil, err
 	}
 
-	if strconv.Itoa(int(order.Seller.ID)) != in.SellerId {
-		return nil, fmt.Errorf("order id invalid")
-	}
+	// if strconv.Itoa(int(order.Seller.ID)) != in.SellerId {
+	// 	return nil, fmt.Errorf("order id invalid")
+	// }
 
 	// company = jne, pos, jnt_cargo,sicepat, tiki, anteraja, ninja, lion
 	// jet, dll
