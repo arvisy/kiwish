@@ -12,3 +12,7 @@ type ReqCreateOrderDirect struct {
 	} `json:"shipment"`
 	PaymentMethod string `json:"payment_method"` // kalo bisa pake OVO | DANA case sensitive
 }
+
+type ReqRejectOrder struct {
+	CauseRejection string `json:"cause_rejection"`
+}

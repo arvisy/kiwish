@@ -8,7 +8,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHandler, order *handler.OrderHandler, userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) {
+func ApiRoutes(
+	r *echo.Echo,
+	user *handler.UserHandler,
+	seller *handler.SellerHandler,
+	order *handler.OrderHandler,
+	notif *handler.NotificationHandler,
+	userGRPC pb.UserServiceClient,
+	sellerGRPC pb.SellerServiceClient,
+	orderGRPC pb.OrderServiceClient,
+	notifGRPC pb.NotificationServiceClient,
+) {
 
 	// public endpoints
 	r.POST("/register", user.Register)
@@ -60,14 +70,22 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 	}
 
 	o := r.Group("/order")
-	o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC))
+	o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC, notifGRPC))
 	{
 		o.POST("", order.CreateOrder)
-		o.GET("/customer", order.GetAllOrderForCustomer, middleware.CustomerAuth)
-		o.GET("/seller", order.GetAllOrderForSeller, middleware.SellerAuth)
+		o.GET("", order.GetAllOrder)
+		o.GET("/:id", order.GetByIdOrder)
+		o.PUT("/accept/:id", order.ConfirmOrder, middleware.SellerAuth)
+		o.PUT("/reject/:id", order.RejectOrder, middleware.SellerAuth)
 		o.POST("/courier/:id", order.AddCourierinfo, middleware.SellerAuth)
 		o.GET("/courier/:id", order.TrackCourierShipment)
 		o.PUT("", order.CustomerConfirmOrder, middleware.CustomerAuth)
 	}
 
+	nt := o.Group("/notification")
+	{
+		nt.GET("", notif.GetAll)
+		nt.PUT("/mark", notif.MarkAllAsRead)
+		nt.PUT("/mark/:id", notif.MarkAsRead)
+	}
 }

@@ -5,21 +5,27 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"ms-user/helpers"
 	"ms-user/model"
 	pb "ms-user/pb"
 	"ms-user/repository"
 	"strconv"
 
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler struct {
 	pb.UnimplementedUserServiceServer
 	UserRepository repository.UserRepository
+	Redis          *redis.Client
 }
 
-func NewUserHandler(UserRepository repository.UserRepository) *UserHandler {
-	return &UserHandler{UserRepository: UserRepository}
+func NewUserHandler(UserRepository repository.UserRepository, redis *redis.Client) *UserHandler {
+	return &UserHandler{
+		UserRepository: UserRepository,
+		Redis:          redis,
+	}
 }
 
 func (u *UserHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
@@ -40,6 +46,11 @@ func (u *UserHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 	if err != nil {
 		fmt.Println(err)
 		return &pb.RegisterResponse{}, err
+	}
+
+	err = helpers.SendRegisterInfo(user.Email, user)
+	if err != nil {
+		return nil, err
 	}
 
 	return &pb.RegisterResponse{
@@ -75,6 +86,15 @@ func (u *UserHandler) GetCustomer(ctx context.Context, in *pb.GetCustomerRequest
 		return nil, err
 	}
 
+	userCache, err := helpers.GetUser(u.Redis, strCon, ctx)
+	if err == nil {
+		return &pb.GetCustomerResponse{
+			Name:     userCache.Name,
+			Email:    userCache.Email,
+			Password: userCache.Password,
+		}, nil
+	}
+
 	user := model.User{
 		Id: strCon,
 	}
@@ -86,6 +106,11 @@ func (u *UserHandler) GetCustomer(ctx context.Context, in *pb.GetCustomerRequest
 
 	if user.Id == 0 {
 		return nil, errors.New("user not found")
+	}
+
+	err = helpers.SetUserCache(u.Redis, &user, ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &pb.GetCustomerResponse{
@@ -215,7 +240,21 @@ func (u *UserHandler) GetCustomerAdmin(ctx context.Context, in *pb.GetCustomerAd
 		return nil, err
 	}
 
+	userCache, err := helpers.GetUser(u.Redis, userID, ctx)
+	if err == nil {
+		return &pb.GetCustomerAdminResponse{
+			UserId: in.UserId,
+			Name:   userCache.Name,
+			Email:  userCache.Email,
+		}, nil
+	}
+
 	user, err := u.UserRepository.GetUserAdmin(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = helpers.SetUserCache(u.Redis, user, ctx)
 	if err != nil {
 		return nil, err
 	}

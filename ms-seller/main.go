@@ -23,9 +23,13 @@ func main() {
 		log.Println(err)
 	}
 	defer db.Close()
+	cache, err := config.InitCache(config.DefaultRedisConfig())
+	if err != nil {
+		log.Println(err)
+	}
 
 	postgresRepo := repository.NewPostgresRepository(db)
-	sellerService := service.NewSellerService(postgresRepo)
+	sellerService := service.NewSellerService(postgresRepo, cache)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterSellerServiceServer(grpcServer, sellerService)

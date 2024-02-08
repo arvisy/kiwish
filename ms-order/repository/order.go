@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"ms-order/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,13 +22,54 @@ func (r OrderRepo) CreateOrder(order *model.Order) error {
 	return nil
 }
 
+func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
+	filter := bson.D{primitive.E{Key: "_id", Value: orderID}}
+
+	var result model.Order
+
+	//Passing the bson.D{{}} as the filter matches  documents in the collection
+	err := r.coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func (r OrderRepo) GetByID(orderid string) (*model.Order, error) {
 	oid, err := primitive.ObjectIDFromHex(orderid)
 	if err != nil {
 		return nil, err
 	}
-
 	filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+	var result model.Order
+	err = r.coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (r OrderRepo) GetByIDV2(orderid string, userid int64, role string) (*model.Order, error) {
+	oid, err := primitive.ObjectIDFromHex(orderid)
+	if err != nil {
+		return nil, err
+	}
+
+	var filter bson.D
+	switch role {
+	case "2":
+		filter = bson.D{{Key: "$and", Value: bson.A{
+			bson.M{"_id": oid},
+			bson.M{"user._id": userid},
+		}}}
+	case "3":
+		filter = bson.D{{Key: "$and", Value: bson.A{
+			bson.M{"_id": oid},
+			bson.M{"seller._id": userid},
+		}}}
+	}
 
 	var result model.Order
 	err = r.coll.FindOne(context.TODO(), filter).Decode(&result)
@@ -38,35 +80,34 @@ func (r OrderRepo) GetByID(orderid string) (*model.Order, error) {
 	return &result, nil
 }
 
-func (r OrderRepo) GetAllForCustomer(userid int64, status string) ([]model.Order, error) {
+func (r OrderRepo) GetAll(userid int64, status string, role string) ([]model.Order, error) {
 	var filter primitive.D
-	if status == "" {
-		filter = bson.D{{Key: "user._id", Value: userid}}
-	} else {
-		filter = bson.D{{Key: "user._id", Value: userid}, {Key: "status", Value: status}}
+	switch role {
+	case "2":
+		if status != "" {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"user._id": userid},
+				bson.M{"status": status},
+			}}}
+		} else {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"user._id": userid},
+			}}}
+		}
+	case "3":
+		if status != "" {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"seller._id": userid},
+				bson.M{"status": status},
+			}}}
+		} else {
+			filter = bson.D{{Key: "$and", Value: bson.A{
+				bson.M{"seller._id": userid},
+			}}}
+		}
 	}
 
-	var result = []model.Order{}
-	cursor, err := r.coll.Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-
-	err = cursor.All(context.Background(), &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func (r OrderRepo) GetAllForSeller(sellerid int64, status string) ([]model.Order, error) {
-	var filter primitive.D
-	if status == "" {
-		filter = bson.D{{Key: "seller._id", Value: sellerid}}
-	} else {
-		filter = bson.D{{Key: "seller._id", Value: sellerid}, {Key: "status", Value: status}}
-	}
+	fmt.Println("AAAAAA")
 
 	var result = []model.Order{}
 	cursor, err := r.coll.Find(context.Background(), filter)
@@ -86,10 +127,12 @@ func (r OrderRepo) Update(order *model.Order) error {
 	filter := bson.D{{Key: "_id", Value: order.ID}}
 	update := bson.M{
 		"$set": bson.M{
-			"status":           order.Status,
-			"payment.status":   order.Payment.Status,
-			"shipment.status":  order.Shipment.Status,
-			"shipment.no_resi": order.Shipment.NoResi,
+			"status":                   order.Status,
+			"payment.status":           order.Payment.Status,
+			"shipment.status":          order.Shipment.Status,
+			"shipment.no_resi":         order.Shipment.NoResi,
+			"confirmation.status":      order.Confirmation.Status,
+			"confirmation.description": order.Confirmation.Description,
 		}}
 	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
