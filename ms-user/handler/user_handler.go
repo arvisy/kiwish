@@ -48,6 +48,11 @@ func (u *UserHandler) Register(ctx context.Context, in *pb.RegisterRequest) (*pb
 		return &pb.RegisterResponse{}, err
 	}
 
+	err = helpers.SendRegisterInfo(user.Email, user)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.RegisterResponse{
 		Name:  user.Name,
 		Email: user.Email,

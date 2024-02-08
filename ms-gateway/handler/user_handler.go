@@ -160,6 +160,18 @@ func (u *UserHandler) GetInfoCustomer(c echo.Context) error {
 	})
 }
 
+// @Summary      Update Customer
+// @Description  User can update their info
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.Address true "The input user struct"
+// @Success      200  {object}  model.User
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user [Put]
 func (u *UserHandler) UpdateCustomer(c echo.Context) error {
 	userID := c.Get("id").(string)
 
@@ -189,6 +201,17 @@ func (u *UserHandler) UpdateCustomer(c echo.Context) error {
 	})
 }
 
+// @Summary      Delete Customer
+// @Description  User can delete account
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Success      200  {object}  model.User
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user [Delete]
 func (u *UserHandler) DeleteCustomer(c echo.Context) error {
 	userID := c.Get("id").(string)
 
@@ -208,6 +231,18 @@ func (u *UserHandler) DeleteCustomer(c echo.Context) error {
 	})
 }
 
+// @Summary      Add Address
+// @Description  User can add address
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.Address true "The input address struct"
+// @Success      200  {object}  model.Address
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user/address [Post]
 func (u *UserHandler) AddAddress(c echo.Context) error {
 	userID := c.Get("id").(string)
 
@@ -277,6 +312,19 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 	})
 }
 
+// @Summary      Update Address
+// @Description  User can update address
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "User ID"
+// @Param		 data body model.Address true "The input address struct"
+// @Success      200  {object}  model.Address
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user/address [Put]
 func (u *UserHandler) UpdateAddress(c echo.Context) error {
 	userID := c.Get("id").(string)
 
@@ -358,6 +406,18 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Customer by ID (admin)
+// @Description  Admin can get customer
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Customer ID"
+// @Success      200  {object}  model.User
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/:id [Put]
 func (u *UserHandler) GetCustomerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -390,6 +450,19 @@ func (u *UserHandler) GetAllCustomerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Update user (admin)
+// @Description  Admin can update user
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "User ID"
+// @Param		 data body model.User true "The input user struct"
+// @Success      200  {object}  model.User
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/:id [Put]
 func (u *UserHandler) UpdateCustomerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -419,6 +492,18 @@ func (u *UserHandler) UpdateCustomerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Delete user (admin)
+// @Description  Admin can delete user
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "User ID"
+// @Success      200  {object}  model.User
+// @Failure      401  {object}  helper.Message
+// @Failure      404  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/:id [Delete]
 func (u *UserHandler) DeleteCustomerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -438,6 +523,18 @@ func (u *UserHandler) DeleteCustomerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Seller by ID (admin)
+// @Description  Admin can get seller user
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Seller ID"
+// @Success      200  {object}  model.Seller
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/seller/:id [Get]
 func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -456,6 +553,18 @@ func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Get all sellers (admin)
+// @Description  Admin can get all sellers
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Success      200  {object}  []model.Seller
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/seller [Get]
 func (u *UserHandler) GetAllSellerAdmin(c echo.Context) error {
 	response, err := u.userGRPC.GetAllSellerAdmin(context.TODO(), &pb.Empty{})
 
@@ -470,6 +579,18 @@ func (u *UserHandler) GetAllSellerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Delete Seller
+// @Description  Admin can delete a seller
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Seller ID"
+// @Success      200  {object}  model.Seller
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/admin/user/seller/:id [Delete]
 func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -489,10 +610,20 @@ func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary      Create Seller
+// @Description  Customer can create a seller
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.SellerName true "The input name struct"
+// @Success      201  {object}  model.Seller
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /api/user/seller [Post]
 func (u *UserHandler) CreateSeller(c echo.Context) error {
 	userID := c.Get("id").(string)
-
-	fmt.Println(userID)
 
 	strConUser, err := strconv.Atoi(userID)
 	if err != nil {

@@ -67,7 +67,7 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		o.GET("/:id", order.GetByIdOrder)
 		o.POST("/accept/:id", order.ConfirmOrder, middleware.SellerAuth)
 		o.POST("/reject/:id", order.RejectOrder, middleware.SellerAuth)
-		o.POST("/courier/:id", order.AddCourierinfo, middleware.SellerAuth)
+		o.PUT("/courier/:id", order.AddCourierinfo, middleware.SellerAuth)
 		o.GET("/courier/:id", order.TrackCourierShipment)
 		o.PUT("", order.CustomerConfirmOrder, middleware.CustomerAuth)
 	}
