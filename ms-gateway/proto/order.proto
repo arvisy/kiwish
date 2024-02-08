@@ -21,6 +21,8 @@ service OrderService {
   rpc AddCourierInfo(AddCourierInfoRequest) returns (CourierResponse) {}
   rpc TrackCourierShipment(TrackCourierShipmentRequest)
       returns (CourierResponse) {}
+  rpc CustomerConfirmOrder(ConfirmOrderRequest) returns (ConfirmOrderResponse) {
+  }
   rpc GetCourierPrice(GetCourierPriceRequest)
       returns (GetCourierPriceResponse) {}
 }

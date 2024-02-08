@@ -11,18 +11,18 @@ import (
 func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHandler, order *handler.OrderHandler, userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceClient, orderGRPC pb.OrderServiceClient) {
 
 	// public endpoints
-	r.POST("/register", user.Register) // working
-	r.POST("/login", user.Login)       // working
+	r.POST("/register", user.Register)
+	r.POST("/login", user.Login)
 
 	customer := r.Group("/api")
 	customer.Use(middleware.Authentication, middleware.CustomerAuth)
 	{
-		customer.GET("/user", user.GetInfoCustomer)       // working kalo ganti jadi seller gabisa akses
-		customer.PUT("/user", user.UpdateCustomer)        // working
-		customer.DELETE("/user", user.DeleteCustomer)     // working
-		customer.POST("/user/address", user.AddAddress)   // working
-		customer.PUT("/user/address", user.UpdateAddress) // working
-		customer.POST("/user/seller", user.CreateSeller)  // working
+		customer.GET("/user", user.GetInfoCustomer)
+		customer.PUT("/user", user.UpdateCustomer)
+		customer.DELETE("/user", user.DeleteCustomer)
+		customer.POST("/user/address", user.AddAddress)
+		customer.PUT("/user/address", user.UpdateAddress)
+		customer.POST("/user/seller", user.CreateSeller)
 	}
 
 	admin := r.Group("/api/admin")
@@ -39,14 +39,14 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 
 	p := r.Group("/products")
 	{
-		p.GET("/:id", seller.GetProductByID)                       // working
-		p.GET("/category/:category", seller.GetProductsByCategory) // working
-		p.GET("/seller/:id", seller.GetProductsBySeller)           // working
+		p.GET("/:id", seller.GetProductByID)
+		p.GET("/category/:category", seller.GetProductsByCategory)
+		p.GET("/seller/:id", seller.GetProductsBySeller)
 	}
 	px := p.Group("")
 	px.Use(middleware.Authentication, middleware.SellerAuth)
 	{
-		px.POST("", seller.AddProduct) // working
+		px.POST("", seller.AddProduct)
 		px.DELETE("/:id", seller.DeleteProduct)
 		px.PUT("/:id", seller.UpdateProduct)
 	}
@@ -67,6 +67,9 @@ func ApiRoutes(r *echo.Echo, user *handler.UserHandler, seller *handler.SellerHa
 		o.GET("/:id", order.GetByIdOrder)
 		o.POST("/accept/:id", order.ConfirmOrder, middleware.SellerAuth)
 		o.POST("/reject/:id", order.RejectOrder, middleware.SellerAuth)
+		o.POST("/courier/:id", order.AddCourierinfo, middleware.SellerAuth)
+		o.GET("/courier/:id", order.TrackCourierShipment)
+		o.PUT("", order.CustomerConfirmOrder, middleware.CustomerAuth)
 	}
 
 }

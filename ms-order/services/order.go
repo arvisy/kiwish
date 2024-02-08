@@ -203,7 +203,7 @@ func (s Service) OrderGetAll(ctx context.Context, in *orderpb.OrderGetAllRequest
 }
 
 func (s Service) OrderGetById(ctx context.Context, in *orderpb.OrderGetByIdRequest) (*orderpb.OrderGetByIdResponse, error) {
-	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	order, err := s.repo.Order.GetByIDV2(in.Id, in.Userid, in.Role)
 	if err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
@@ -265,7 +265,7 @@ func (s Service) OrderGetById(ctx context.Context, in *orderpb.OrderGetByIdReque
 }
 
 func (s Service) OrderConfirmationAccept(ctx context.Context, in *orderpb.OrderConfirmationAcceptRequest) (*orderpb.OrderConfirmationAcceptResponse, error) {
-	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	order, err := s.repo.Order.GetByIDV2(in.Id, in.Userid, in.Role)
 	if err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
@@ -295,7 +295,7 @@ func (s Service) OrderConfirmationAccept(ctx context.Context, in *orderpb.OrderC
 }
 
 func (s Service) OrderConfirmationCancel(ctx context.Context, in *orderpb.OrderConfirmationCancelRequest) (*orderpb.OrderConfirmationCancelResponse, error) {
-	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	order, err := s.repo.Order.GetByIDV2(in.Id, in.Userid, in.Role)
 	if err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
@@ -325,7 +325,7 @@ func (s Service) OrderConfirmationCancel(ctx context.Context, in *orderpb.OrderC
 }
 
 func (s Service) OrderUpdate(ctx context.Context, in *orderpb.OrderUpdateRequest) (*orderpb.OrderUpdateResponse, error) {
-	order, err := s.repo.Order.GetByID(in.Id, in.Userid, in.Role)
+	order, err := s.repo.Order.GetByIDV2(in.Id, in.Userid, in.Role)
 	if err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):

@@ -32,6 +32,7 @@ type OrderServiceClient interface {
 	// courier
 	AddCourierInfo(ctx context.Context, in *AddCourierInfoRequest, opts ...grpc.CallOption) (*CourierResponse, error)
 	TrackCourierShipment(ctx context.Context, in *TrackCourierShipmentRequest, opts ...grpc.CallOption) (*CourierResponse, error)
+	CustomerConfirmOrder(ctx context.Context, in *ConfirmOrderRequest, opts ...grpc.CallOption) (*ConfirmOrderResponse, error)
 	GetCourierPrice(ctx context.Context, in *GetCourierPriceRequest, opts ...grpc.CallOption) (*GetCourierPriceResponse, error)
 }
 
@@ -115,6 +116,15 @@ func (c *orderServiceClient) TrackCourierShipment(ctx context.Context, in *Track
 	return out, nil
 }
 
+func (c *orderServiceClient) CustomerConfirmOrder(ctx context.Context, in *ConfirmOrderRequest, opts ...grpc.CallOption) (*ConfirmOrderResponse, error) {
+	out := new(ConfirmOrderResponse)
+	err := c.cc.Invoke(ctx, "/OrderService/CustomerConfirmOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *orderServiceClient) GetCourierPrice(ctx context.Context, in *GetCourierPriceRequest, opts ...grpc.CallOption) (*GetCourierPriceResponse, error) {
 	out := new(GetCourierPriceResponse)
 	err := c.cc.Invoke(ctx, "/OrderService/GetCourierPrice", in, out, opts...)
@@ -138,6 +148,7 @@ type OrderServiceServer interface {
 	// courier
 	AddCourierInfo(context.Context, *AddCourierInfoRequest) (*CourierResponse, error)
 	TrackCourierShipment(context.Context, *TrackCourierShipmentRequest) (*CourierResponse, error)
+	CustomerConfirmOrder(context.Context, *ConfirmOrderRequest) (*ConfirmOrderResponse, error)
 	GetCourierPrice(context.Context, *GetCourierPriceRequest) (*GetCourierPriceResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
@@ -169,6 +180,9 @@ func (UnimplementedOrderServiceServer) AddCourierInfo(context.Context, *AddCouri
 }
 func (UnimplementedOrderServiceServer) TrackCourierShipment(context.Context, *TrackCourierShipmentRequest) (*CourierResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TrackCourierShipment not implemented")
+}
+func (UnimplementedOrderServiceServer) CustomerConfirmOrder(context.Context, *ConfirmOrderRequest) (*ConfirmOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CustomerConfirmOrder not implemented")
 }
 func (UnimplementedOrderServiceServer) GetCourierPrice(context.Context, *GetCourierPriceRequest) (*GetCourierPriceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCourierPrice not implemented")
@@ -330,6 +344,24 @@ func _OrderService_TrackCourierShipment_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_CustomerConfirmOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).CustomerConfirmOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/OrderService/CustomerConfirmOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).CustomerConfirmOrder(ctx, req.(*ConfirmOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OrderService_GetCourierPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCourierPriceRequest)
 	if err := dec(in); err != nil {
@@ -386,6 +418,10 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TrackCourierShipment",
 			Handler:    _OrderService_TrackCourierShipment_Handler,
+		},
+		{
+			MethodName: "CustomerConfirmOrder",
+			Handler:    _OrderService_CustomerConfirmOrder_Handler,
 		},
 		{
 			MethodName: "GetCourierPrice",

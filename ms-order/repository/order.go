@@ -36,7 +36,22 @@ func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
 	return &result, nil
 }
 
-func (r OrderRepo) GetByID(orderid string, userid int64, role string) (*model.Order, error) {
+func (r OrderRepo) GetByID(orderid string) (*model.Order, error) {
+	oid, err := primitive.ObjectIDFromHex(orderid)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{primitive.E{Key: "_id", Value: oid}}
+	var result model.Order
+	err = r.coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (r OrderRepo) GetByIDV2(orderid string, userid int64, role string) (*model.Order, error) {
 	oid, err := primitive.ObjectIDFromHex(orderid)
 	if err != nil {
 		return nil, err
@@ -132,6 +147,21 @@ func (r OrderRepo) UpdateShipmentResiStatus(order *model.Order) (*model.Order, e
 	update := bson.M{ // update resi status
 		"$set": bson.M{
 			"Shipment": order.Shipment,
+		}}
+
+	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+func (r OrderRepo) UpdateOrderStatus(order *model.Order) (*model.Order, error) {
+	filter := bson.D{primitive.E{Key: "_id", Value: order.ID}}
+
+	update := bson.M{ // update resi status
+		"$set": bson.M{
+			"Status": order.Status,
 		}}
 
 	_, err := r.coll.UpdateOne(context.TODO(), filter, update)
