@@ -1451,8 +1451,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "E-commerce API with product management and shipment features.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
+	// LeftDelim:        "{{",
+	// RightDelim:       "}}",
 }
 
 func init() {

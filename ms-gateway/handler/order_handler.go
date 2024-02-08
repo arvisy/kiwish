@@ -108,11 +108,14 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 	}
 
 	// send notif customer
-	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+	_, err = h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
 		ReceiverId:  userid,
 		Subject:     "Segera Lakukan Pembayaran",
 		Description: fmt.Sprintf("Hai %s pesananmu dengan #ID %v belum dibayar. Segera lakukan pembayaran link: %v", res.Order.User.Name, res.Order.Id, res.Order.Payment.InvoiceUrl),
 	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order":   res.Order,
@@ -190,11 +193,14 @@ func (h OrderHandler) ConfirmOrder(c echo.Context) error {
 	}
 
 	// send notif customer
-	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+	_, err = h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
 		ReceiverId:  resorder.Order.User.Id,
 		Subject:     "Pesanan Diproses",
 		Description: fmt.Sprintf("Hai %s, pesananmu dengan #ID %v telah di proses oleh penjual", resorder.Order.User.Name, resorder.Order.Id),
 	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order_id": res.Id,
@@ -232,11 +238,14 @@ func (h OrderHandler) RejectOrder(c echo.Context) error {
 	}
 
 	// send notif customer
-	h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+	_, err = h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
 		ReceiverId:  resorder.Order.User.Id,
 		Subject:     "Pesanan Dicancel",
 		Description: fmt.Sprintf("Hai %s, pesananmu dengan #ID %v telah di cancel oleh penjual. Berikut adalah alasannya: %v", resorder.Order.User.Name, resorder.Order.Id, input.CauseRejection),
 	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"order_id": res.Id,
@@ -339,13 +348,38 @@ func (h OrderHandler) CustomerConfirmOrder(c echo.Context) error {
 		})
 	}
 	in := pb.ConfirmOrderRequest{
-		OrderId:    strconv.Itoa(input.OrderID),
+		OrderId:    input.OrderID,
 		CustomerId: customerID,
 	}
 
 	_, err := h.orderGRPC.CustomerConfirmOrder(context.TODO(), &in)
 	if err != nil {
 		return echo.NewHTTPError(500, echo.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// Send Notification to seller
+	userid, _ := strconv.ParseInt(customerID, 10, 64)
+	role := c.Get("role").(string)
+	res, err := h.orderGRPC.OrderGetById(context.Background(), &pb.OrderGetByIdRequest{
+		Id:     input.OrderID,
+		Userid: userid,
+		Role:   role,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
+			"message": err.Error(),
+		})
+	}
+
+	_, err = h.notifGRPC.CreateNotification(context.Background(), &pb.CreateNotificationRequest{
+		ReceiverId:  res.Order.Seller.Id,
+		Subject:     "Pesanan Telah Diterima",
+		Description: fmt.Sprintf("Hai %s orderan dengan #ID %v telah sampai dan di terima oleh %s", res.Order.User.Name, res.Order.Id, res.Order.User.Name),
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, echo.Map{
 			"message": err.Error(),
 		})
 	}
