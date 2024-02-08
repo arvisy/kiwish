@@ -21,20 +21,6 @@ func (r OrderRepo) CreateOrder(order *model.Order) error {
 	return nil
 }
 
-func (r OrderRepo) GetOrder(orderID string) (*model.Order, error) {
-	filter := bson.D{primitive.E{Key: "_id", Value: orderID}}
-
-	var result model.Order
-
-	//Passing the bson.D{{}} as the filter matches  documents in the collection
-	err := r.coll.FindOne(context.TODO(), filter).Decode(&result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
 func (r OrderRepo) GetByID(orderid string) (*model.Order, error) {
 	oid, err := primitive.ObjectIDFromHex(orderid)
 	if err != nil {
