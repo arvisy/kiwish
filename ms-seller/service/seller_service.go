@@ -3,22 +3,26 @@ package service
 import (
 	"context"
 	"fmt"
+	"ms-seller/helpers"
 	"ms-seller/model"
 	"ms-seller/pb"
 	"ms-seller/repository"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type SellerService struct {
 	SellerRepository repository.SellerRepository
+	Redis            *redis.Client
 	pb.UnimplementedSellerServiceServer
 }
 
-func NewSellerService(seller repository.SellerRepository) *SellerService {
+func NewSellerService(seller repository.SellerRepository, redis *redis.Client) *SellerService {
 	return &SellerService{
 		SellerRepository: seller,
+		Redis:            redis,
 	}
 }
 
@@ -34,6 +38,11 @@ func (se *SellerService) AddProduct(ctx context.Context, in *pb.AddProductReques
 	}
 
 	product, err := se.SellerRepository.CreateProduct(&input)
+	if err != nil {
+		return nil, err
+	}
+
+	err = helpers.SetProductCache(se.Redis, product, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +87,27 @@ func (se *SellerService) GetProductsBySeller(ctx context.Context, in *pb.GetProd
 }
 
 func (se *SellerService) GetProductByID(ctx context.Context, in *pb.GetProductByIDRequest) (*pb.ProductResponse, error) {
+	// check cache if product info exists
+	productCache, err := helpers.GetProduct(se.Redis, int(in.ProductId), ctx)
+	if err == nil {
+		var response = &pb.ProductResponse{
+			Productid:  int32(productCache.ID),
+			SellerId:   int32(productCache.SellerID),
+			Price:      float32(productCache.Price),
+			Name:       productCache.Name,
+			Stock:      int32(productCache.Stock),
+			CategoryId: int32(productCache.Category_id),
+			Discount:   int32(productCache.Discount),
+		}
+		return response, nil
+	}
+
 	product, err := se.SellerRepository.ReadProductID(int(in.ProductId))
+	if err != nil {
+		return nil, err
+	}
+
+	err = helpers.SetProductCache(se.Redis, product, ctx)
 	if err != nil {
 		return nil, err
 	}
