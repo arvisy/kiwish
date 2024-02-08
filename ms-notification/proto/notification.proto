@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "ms-notification/pb";
+
+service NotificationService {
+  rpc CreateNotification(CreateNotificationRequest)
+      returns (CreateNotificationResponse) {}
+  rpc GetAllNotification(GetAllNotificationRequest)
+      returns (GetAllNotificationResponse) {}
+  rpc UpdateNotification(UpdateNotificationRequest)
+      returns (UpdateNotificationResponse) {}
+  rpc MarkAllAsRead(MarkAllAsReadRequest) returns (MarkAllAsReadResponse) {}
+  rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse) {}
+}
+
+message Notification {
+  string id = 1;
+  string subject = 2;
+  string description = 3;
+  string status = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message CreateNotificationRequest {
+  int64 receiver_id = 1;
+  string subject = 2;
+  string description = 3;
+}
+message CreateNotificationResponse { string message = 1; }
+
+message GetAllNotificationRequest { int64 receiver_id = 1; }
+message GetAllNotificationResponse { repeated Notification notifications = 1; }
+
+message UpdateNotificationRequest {
+  string id = 1;
+  int64 receiver_id = 2;
+  string status = 3;
+}
+message UpdateNotificationResponse { string message = 1; }
+
+message MarkAllAsReadRequest { int64 receiver_id = 1; }
+message MarkAllAsReadResponse { string message = 1; }
+
+message MarkAsReadRequest {
+  string id = 1;
+  int64 receiver_id = 2;
+}
+message MarkAsReadResponse { string message = 1; }

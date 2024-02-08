@@ -41,19 +41,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	notifConn, err := grpc.Dial(":50004", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	defer sellerConn.Close()
 
 	userService := pb.NewUserServiceClient(userConn)
 	sellerService := pb.NewSellerServiceClient(sellerConn)
 	orderService := pb.NewOrderServiceClient(orderConn)
+	notifService := pb.NewNotificationServiceClient(notifConn)
 
 	u := handler.NewUserHandler(userService, sellerService)
 	s := handler.NewSellerHandler(sellerService)
-	o := handler.NewOrderHandler(userService, sellerService, orderService)
+	o := handler.NewOrderHandler(userService, sellerService, orderService, notifService)
+	nt := handler.NewNotificationHandler(notifService)
 
 	e := echo.New()
 
-	routes.ApiRoutes(e, u, s, o, userService, sellerService, orderService)
+	routes.ApiRoutes(e, u, s, o, nt, userService, sellerService, orderService, notifService)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 

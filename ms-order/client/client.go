@@ -2,8 +2,6 @@ package client
 
 import (
 	"ms-order/config"
-	sellerpb "ms-seller/pb"
-	userpb "ms-user/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -11,8 +9,6 @@ import (
 
 type Client struct {
 	Payment PaymentClient
-	Seller  MsSellerClient
-	User    MsUserClient
 	Courier CourierClient
 }
 
@@ -41,8 +37,6 @@ func New(cfg config.Config) (*Client, func(), error) {
 	client := &Client{
 		Payment: PaymentClient{cfg: cfg},
 		Courier: CourierClient{cfg: cfg},
-		Seller:  MsSellerClient{client: sellerpb.NewSellerServiceClient(sellerconn)},
-		User:    MsUserClient{client: userpb.NewUserServiceClient(userconn)},
 	}
 	return client, closefn, nil
 }
