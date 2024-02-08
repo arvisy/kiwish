@@ -26,7 +26,7 @@ import (
 
 // @host localhost:8080
 func main() {
-	userConn, err := grpc.Dial("localhost:50001", grpc.WithInsecure())
+	userConn, err := grpc.Dial(":50001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
