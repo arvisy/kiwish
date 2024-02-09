@@ -962,6 +962,63 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "description": "Customer Confirm Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Customer Confirm Order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "input payload",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ConfirmOrderID"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create order for customer",
                 "consumes": [
@@ -2172,6 +2229,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "regency": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ConfirmOrderID": {
+            "type": "object",
+            "properties": {
+                "order_id": {
                     "type": "string"
                 }
             }

@@ -388,6 +388,18 @@ func (h OrderHandler) TrackCourierShipment(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// @Summary      Customer Confirm Order
+// @Description  Customer Confirm Order
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body model.ConfirmOrderID true "input payload"
+// @Success      200  {object}  helper.Message
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /order [Put]
 func (h OrderHandler) CustomerConfirmOrder(c echo.Context) error {
 	customerID := c.Get("id").(string)
 

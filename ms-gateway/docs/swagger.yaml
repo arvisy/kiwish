@@ -149,6 +149,11 @@ definitions:
       regency:
         type: string
     type: object
+  model.ConfirmOrderID:
+    properties:
+      order_id:
+        type: string
+    type: object
   model.Courier:
     properties:
       awb:
@@ -951,6 +956,44 @@ paths:
           schema:
             $ref: '#/definitions/helper.Message'
       summary: Creating Order
+      tags:
+      - Order
+    put:
+      consumes:
+      - application/json
+      description: Customer Confirm Order
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: input payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ConfirmOrderID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Customer Confirm Order
       tags:
       - Order
   /order/:id:

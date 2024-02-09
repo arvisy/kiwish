@@ -7,6 +7,8 @@ import (
 	pb "ms-gateway/pb"
 	routes "ms-gateway/router"
 
+	_ "ms-gateway/docs"
+
 	"github.com/labstack/echo/v4"
 	midd "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
