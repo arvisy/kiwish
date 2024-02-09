@@ -98,6 +98,61 @@ const docTemplate = `{
             }
         },
         "/api/admin/user/:id": {
+            "get": {
+                "description": "Admin can get customer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get Customer by ID (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Customer ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Admin can update user",
                 "consumes": [
@@ -107,7 +162,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Update user (admin)",
                 "parameters": [
@@ -171,7 +226,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Delete user (admin)",
                 "parameters": [
@@ -228,7 +283,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Get all sellers (admin)",
                 "parameters": [
@@ -288,7 +343,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Get Seller by ID (admin)",
                 "parameters": [
@@ -343,7 +398,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Delete Seller",
                 "parameters": [
@@ -392,7 +447,7 @@ const docTemplate = `{
         },
         "/api/user": {
             "get": {
-                "description": "Get a user's info",
+                "description": "Get a customer's info",
                 "consumes": [
                     "application/json"
                 ],
@@ -400,9 +455,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Seller"
+                    "Customer"
                 ],
-                "summary": "Get User Info",
+                "summary": "Get customer Info",
                 "parameters": [
                     {
                         "type": "string",
@@ -440,7 +495,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "User can update their info",
+                "description": "Customer can update their info",
                 "consumes": [
                     "application/json"
                 ],
@@ -448,7 +503,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Update Customer",
                 "parameters": [
@@ -497,7 +552,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "User can delete account",
+                "description": "Customer can delete account",
                 "consumes": [
                     "application/json"
                 ],
@@ -505,7 +560,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Delete Customer",
                 "parameters": [
@@ -547,7 +602,7 @@ const docTemplate = `{
         },
         "/api/user/address": {
             "put": {
-                "description": "User can update address",
+                "description": "Customer can update address",
                 "consumes": [
                     "application/json"
                 ],
@@ -555,7 +610,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Update Address",
                 "parameters": [
@@ -611,7 +666,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "User can add address",
+                "description": "Customer can add address",
                 "consumes": [
                     "application/json"
                 ],
@@ -619,7 +674,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Add Address",
                 "parameters": [
@@ -678,7 +733,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Create Seller",
                 "parameters": [

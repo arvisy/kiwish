@@ -380,7 +380,44 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Delete user (admin)
       tags:
-      - User
+      - Admin
+    get:
+      consumes:
+      - application/json
+      description: Admin can get customer
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Customer ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Get Customer by ID (admin)
+      tags:
+      - Admin
     put:
       consumes:
       - application/json
@@ -423,7 +460,7 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Update user (admin)
       tags:
-      - User
+      - Admin
   /api/admin/user/seller:
     get:
       consumes:
@@ -463,7 +500,7 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Get all sellers (admin)
       tags:
-      - User
+      - Admin
   /api/admin/user/seller/:id:
     delete:
       consumes:
@@ -501,7 +538,7 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Delete Seller
       tags:
-      - User
+      - Admin
     get:
       consumes:
       - application/json
@@ -538,12 +575,12 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Get Seller by ID (admin)
       tags:
-      - User
+      - Admin
   /api/user:
     delete:
       consumes:
       - application/json
-      description: User can delete account
+      description: Customer can delete account
       parameters:
       - description: JWT Token
         in: header
@@ -571,11 +608,11 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Delete Customer
       tags:
-      - User
+      - Customer
     get:
       consumes:
       - application/json
-      description: Get a user's info
+      description: Get a customer's info
       parameters:
       - description: JWT Token
         in: header
@@ -601,13 +638,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Message'
-      summary: Get User Info
+      summary: Get customer Info
       tags:
-      - Seller
+      - Customer
     put:
       consumes:
       - application/json
-      description: User can update their info
+      description: Customer can update their info
       parameters:
       - description: JWT Token
         in: header
@@ -641,12 +678,12 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Update Customer
       tags:
-      - User
+      - Customer
   /api/user/address:
     post:
       consumes:
       - application/json
-      description: User can add address
+      description: Customer can add address
       parameters:
       - description: JWT Token
         in: header
@@ -680,11 +717,11 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Add Address
       tags:
-      - User
+      - Customer
     put:
       consumes:
       - application/json
-      description: User can update address
+      description: Customer can update address
       parameters:
       - description: JWT Token
         in: header
@@ -723,7 +760,7 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Update Address
       tags:
-      - User
+      - Customer
   /api/user/seller:
     post:
       consumes:
@@ -762,7 +799,7 @@ paths:
             $ref: '#/definitions/helper.Message'
       summary: Create Seller
       tags:
-      - User
+      - Customer
   /courier/:id:
     get:
       consumes:
