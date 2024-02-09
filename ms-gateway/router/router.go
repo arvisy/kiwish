@@ -70,7 +70,7 @@ func ApiRoutes(
 	}
 
 	o := r.Group("/order")
-	// o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC, notifGRPC))
+	o.Use(middleware.Authentication, middleware.CheckPayment(userGRPC, sellerGRPC, orderGRPC, notifGRPC))
 	o.Use(middleware.Authentication)
 	{
 		o.POST("", order.CreateOrder)
