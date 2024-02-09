@@ -70,6 +70,7 @@ func (u *UserHandler) Register(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, helper.Response{
 			Message: "failed to register user",
+			Detail:  err.Error(),
 		})
 	}
 
