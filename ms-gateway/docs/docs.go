@@ -23,9 +23,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/admin/seller": {
+        "/api/admin/user/:id": {
             "get": {
-                "description": "Admin can get all sellers",
+                "description": "Admin can get customer",
                 "consumes": [
                     "application/json"
                 ],
@@ -33,9 +33,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
-                "summary": "Get all sellers (admin)",
+                "summary": "Get Customer by ID (admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -46,7 +46,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Order ID",
+                        "description": "Customer ID",
                         "name": "ID",
                         "in": "path",
                         "required": true
@@ -56,10 +56,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Seller"
-                            }
+                            "$ref": "#/definitions/model.User"
                         }
                     },
                     "400": {
@@ -81,9 +78,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/admin/user/:id": {
+            },
             "put": {
                 "description": "Admin can update user",
                 "consumes": [
@@ -93,7 +88,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Update user (admin)",
                 "parameters": [
@@ -157,7 +152,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Delete user (admin)",
                 "parameters": [
@@ -204,6 +199,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/user/seller": {
+            "get": {
+                "description": "Admin can get all sellers",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all sellers (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Seller"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/user/seller/:id": {
             "get": {
                 "description": "Admin can get seller user",
@@ -214,9 +269,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
-                "summary": "Get Seller (admin)",
+                "summary": "Get Seller by ID (admin)",
                 "parameters": [
                     {
                         "type": "string",
@@ -269,7 +324,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Admin"
                 ],
                 "summary": "Delete Seller",
                 "parameters": [
@@ -318,7 +373,7 @@ const docTemplate = `{
         },
         "/api/user": {
             "get": {
-                "description": "Get a user's info",
+                "description": "Get a customer's info",
                 "consumes": [
                     "application/json"
                 ],
@@ -326,9 +381,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Seller"
+                    "Customer"
                 ],
-                "summary": "Get User Info",
+                "summary": "Get customer Info",
                 "parameters": [
                     {
                         "type": "string",
@@ -364,6 +419,234 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Customer can update their info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Update Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "The input user struct",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Address"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Customer can delete account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Delete Customer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/address": {
+            "put": {
+                "description": "Customer can update address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Update Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The input address struct",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Address"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Address"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Customer can add address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Add Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "The input address struct",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Address"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Address"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Message"
+                        }
+                    }
+                }
             }
         },
         "/api/user/seller": {
@@ -376,7 +659,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Customer"
                 ],
                 "summary": "Create Seller",
                 "parameters": [
@@ -1451,8 +1734,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "E-commerce API with product management and shipment features.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	// LeftDelim:        "{{",
-	// RightDelim:       "}}",
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

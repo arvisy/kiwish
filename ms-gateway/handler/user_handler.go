@@ -131,9 +131,9 @@ func (u *UserHandler) Login(c echo.Context) error {
 	})
 }
 
-// @Summary      Get User Info
-// @Description  Get a user's info
-// @Tags         Seller
+// @Summary      Get customer Info
+// @Description  Get a customer's info
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -161,8 +161,8 @@ func (u *UserHandler) GetInfoCustomer(c echo.Context) error {
 }
 
 // @Summary      Update Customer
-// @Description  User can update their info
-// @Tags         User
+// @Description  Customer can update their info
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -202,8 +202,8 @@ func (u *UserHandler) UpdateCustomer(c echo.Context) error {
 }
 
 // @Summary      Delete Customer
-// @Description  User can delete account
-// @Tags         User
+// @Description  Customer can delete account
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -232,8 +232,8 @@ func (u *UserHandler) DeleteCustomer(c echo.Context) error {
 }
 
 // @Summary      Add Address
-// @Description  User can add address
-// @Tags         User
+// @Description  Customer can add address
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -313,8 +313,8 @@ func (u *UserHandler) AddAddress(c echo.Context) error {
 }
 
 // @Summary      Update Address
-// @Description  User can update address
-// @Tags         User
+// @Description  Customer can update address
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -408,7 +408,7 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 
 // @Summary      Get Customer by ID (admin)
 // @Description  Admin can get customer
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -417,7 +417,7 @@ func (u *UserHandler) UpdateAddress(c echo.Context) error {
 // @Failure      400  {object}  helper.Message
 // @Failure      401  {object}  helper.Message
 // @Failure      500  {object}  helper.Message
-// @Router       /api/admin/user/:id [Put]
+// @Router       /api/admin/user/:id [Get]
 func (u *UserHandler) GetCustomerAdmin(c echo.Context) error {
 	userID := c.Param("id")
 
@@ -452,7 +452,7 @@ func (u *UserHandler) GetAllCustomerAdmin(c echo.Context) error {
 
 // @Summary      Update user (admin)
 // @Description  Admin can update user
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -494,7 +494,7 @@ func (u *UserHandler) UpdateCustomerAdmin(c echo.Context) error {
 
 // @Summary      Delete user (admin)
 // @Description  Admin can delete user
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -525,7 +525,7 @@ func (u *UserHandler) DeleteCustomerAdmin(c echo.Context) error {
 
 // @Summary      Get Seller by ID (admin)
 // @Description  Admin can get seller user
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -555,7 +555,7 @@ func (u *UserHandler) GetSellerAdmin(c echo.Context) error {
 
 // @Summary      Get all sellers (admin)
 // @Description  Admin can get all sellers
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -581,7 +581,7 @@ func (u *UserHandler) GetAllSellerAdmin(c echo.Context) error {
 
 // @Summary      Delete Seller
 // @Description  Admin can delete a seller
-// @Tags         User
+// @Tags         Admin
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
@@ -612,7 +612,7 @@ func (u *UserHandler) DeleteSellerAdmin(c echo.Context) error {
 
 // @Summary      Create Seller
 // @Description  Customer can create a seller
-// @Tags         User
+// @Tags         Customer
 // @Accept       json
 // @Produce      json
 // @Param Authorization header string true "JWT Token"
