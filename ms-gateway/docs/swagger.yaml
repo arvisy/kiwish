@@ -1,7 +1,141 @@
 definitions:
+  dto.ReqCreateOrderDirect:
+    properties:
+      payment_method:
+        description: kalo bisa pake OVO | DANA case sensitive
+        type: string
+      products:
+        items:
+          properties:
+            product_id:
+              type: integer
+            quantity:
+              type: integer
+          type: object
+        type: array
+      seller_id:
+        type: integer
+      shipment:
+        properties:
+          company:
+            description: kalo bisa pake REG case sensitif
+            type: string
+          service:
+            description: Kalo bisa pake jne | tiki case sensitif
+            type: string
+        type: object
+    type: object
+  dto.ReqRejectOrder:
+    properties:
+      cause_rejection:
+        type: string
+    type: object
   helper.Message:
     properties:
       message:
+        type: string
+    type: object
+  mdorder.Confirmation:
+    properties:
+      description:
+        type: string
+      status:
+        type: string
+    type: object
+  mdorder.CreateOrder:
+    properties:
+      order:
+        $ref: '#/definitions/mdorder.Order'
+    type: object
+  mdorder.GetAllOrder:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/mdorder.Order'
+        type: array
+    type: object
+  mdorder.Order:
+    properties:
+      confirmation:
+        $ref: '#/definitions/mdorder.Confirmation'
+      createdAt:
+        type: string
+      id:
+        type: string
+      payment:
+        $ref: '#/definitions/mdorder.Payment'
+      products:
+        items:
+          $ref: '#/definitions/mdorder.Product'
+        type: array
+      seller:
+        $ref: '#/definitions/mdorder.Seller'
+      shipment:
+        $ref: '#/definitions/mdorder.Shipment'
+      status:
+        type: string
+      subtotal:
+        type: number
+      total:
+        type: number
+      user:
+        $ref: '#/definitions/mdorder.User'
+    type: object
+  mdorder.Payment:
+    properties:
+      invoiceID:
+        type: string
+      invoiceURL:
+        type: string
+      method:
+        type: string
+      status:
+        type: string
+    type: object
+  mdorder.Product:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+    type: object
+  mdorder.Seller:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  mdorder.Shipment:
+    properties:
+      company:
+        type: string
+      noResi:
+        type: string
+      price:
+        type: number
+      service:
+        type: string
+      status:
+        type: string
+    type: object
+  mdorder.User:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      id:
+        type: integer
+      name:
         type: string
     type: object
   model.Address:
@@ -13,6 +147,11 @@ definitions:
       id:
         type: integer
       regency:
+        type: string
+    type: object
+  model.ConfirmOrderID:
+    properties:
+      order_id:
         type: string
     type: object
   model.Courier:
@@ -155,6 +294,55 @@ info:
   title: Kiwish
   version: "1.0"
 paths:
+  /accept/:id:
+    put:
+      consumes:
+      - application/json
+      description: Accept order by seller
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      - description: The input courier struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CourierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              order_id:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Seller accept order
+      tags:
+      - Order
   /api/admin/user/:id:
     delete:
       consumes:
@@ -731,6 +919,271 @@ paths:
       summary: Login
       tags:
       - User
+  /order:
+    get:
+      consumes:
+      - application/json
+      description: Getting all order
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/mdorder.GetAllOrder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Get All Order
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      description: Create order for customer
+      parameters:
+      - description: create order payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReqCreateOrderDirect'
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/mdorder.CreateOrder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Creating Order
+      tags:
+      - Order
+    put:
+      consumes:
+      - application/json
+      description: Customer Confirm Order
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: input payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ConfirmOrderID'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Customer Confirm Order
+      tags:
+      - Order
+  /order/:id:
+    get:
+      consumes:
+      - application/json
+      description: Getting order by id
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/mdorder.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Get Order by id
+      tags:
+      - Order
+  /order/notification:
+    get:
+      consumes:
+      - application/json
+      description: Get All Notification
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Get Notification
+      tags:
+      - Order
+  /order/notification/mark:
+    put:
+      consumes:
+      - application/json
+      description: Mark All notification as read
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Mark All Notification
+      tags:
+      - Order
+  /order/notification/mark/:id:
+    put:
+      consumes:
+      - application/json
+      description: Mark Notification By id
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Mark Notification By Id
+      tags:
+      - Order
   /products:
     post:
       consumes:
@@ -1003,6 +1456,61 @@ paths:
       summary: Register
       tags:
       - User
+  /reject/:id:
+    put:
+      consumes:
+      - application/json
+      description: Reject order by seller
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: input payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReqRejectOrder'
+      - description: Order ID
+        in: path
+        name: ID
+        required: true
+        type: integer
+      - description: The input courier struct
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CourierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+              order_id:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Message'
+      summary: Seller reject order
+      tags:
+      - Order
   /sellers:
     get:
       consumes:
