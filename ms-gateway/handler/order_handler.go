@@ -30,6 +30,18 @@ func NewOrderHandler(userGRPC pb.UserServiceClient, sellerGRPC pb.SellerServiceC
 	}
 }
 
+// @Summary      Creating Order
+// @Description  Create order for customer
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param		 data body dto.ReqCreateOrderDirect true "create order payload"
+// @Param Authorization header string true "JWT Token"
+// @Success      201  {object}  mdorder.CreateOrder
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /order [Post]
 func (h OrderHandler) CreateOrder(c echo.Context) error {
 	var input dto.ReqCreateOrderDirect
 	if err := c.Bind(&input); err != nil {
@@ -123,6 +135,18 @@ func (h OrderHandler) CreateOrder(c echo.Context) error {
 	})
 }
 
+// @Summary      Get All Order
+// @Description  Getting all order
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Success      200  {object}  mdorder.GetAllOrder
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /order [Get]
 func (h OrderHandler) GetAllOrder(c echo.Context) error {
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
 	role := c.Get("role").(string)
@@ -150,6 +174,18 @@ func (h OrderHandler) GetAllOrder(c echo.Context) error {
 	})
 }
 
+// @Summary      Get Order by id
+// @Description  Getting order by id
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Success      200  {object}  mdorder.Order
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /order/:id [Get]
 func (h OrderHandler) GetByIdOrder(c echo.Context) error {
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
 	role := c.Get("role").(string)
@@ -169,6 +205,19 @@ func (h OrderHandler) GetByIdOrder(c echo.Context) error {
 	})
 }
 
+// @Summary      Seller accept order
+// @Description  Accept order by seller
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param ID path int true "Order ID"
+// @Param		 data body model.CourierRequest true "The input courier struct"
+// @Success      200  {object}  object{order_id=string,message=string}
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /accept/:id [Put]
 func (h OrderHandler) ConfirmOrder(c echo.Context) error {
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
 	role := c.Get("role").(string)
@@ -208,6 +257,20 @@ func (h OrderHandler) ConfirmOrder(c echo.Context) error {
 	})
 }
 
+// @Summary      Seller reject order
+// @Description  Reject order by seller
+// @Tags         Order
+// @Accept       json
+// @Produce      json
+// @Param Authorization header string true "JWT Token"
+// @Param		 data body dto.ReqRejectOrder true "input payload"
+// @Param ID path int true "Order ID"
+// @Param		 data body model.CourierRequest true "The input courier struct"
+// @Success      200  {object}  object{order_id=string,message=string}
+// @Failure      400  {object}  helper.Message
+// @Failure      401  {object}  helper.Message
+// @Failure      500  {object}  helper.Message
+// @Router       /reject/:id [Put]
 func (h OrderHandler) RejectOrder(c echo.Context) error {
 	userid, _ := strconv.ParseInt(c.Get("id").(string), 10, 64)
 	role := c.Get("role").(string)
