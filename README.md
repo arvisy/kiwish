@@ -1,6 +1,6 @@
 # Kiwish
 
-<img align="right" width="220px" src="./misc/kiwish-logo-1.png">
+<img align="right" width="240px" src="./misc/kiwish-logo-1.png">
 
 An e-commerce API with many features, made using microservices and gRPC.
 
