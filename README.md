@@ -4,7 +4,7 @@
 
 An e-commerce API with many features, made using microservices and gRPC.
 
-[API Documentation](https://ms-gateway-zx7zn2gpva-as.a.run.app/swagger/index.html)
+[API Documentation](https://kietpa.github.io/projects/kiwish/)
 
 ## Features
 - Microservice Architecture
